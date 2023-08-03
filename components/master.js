@@ -143,7 +143,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                                             <Draggable key={item} draggableId={item} index={index}>
                                                 {(provided) => (
                                                     <ListGroup.Item ref={provided.innerRef} {...provided.dragHandleProps} {...provided.draggableProps}>
-                                                        <i className={classnames(icon, 'me-2')}></i>{item}
+                                                        <i className={classnames(icon, 'me-2')}/>{item}
                                                     </ListGroup.Item>
                                                 )}
                                             </Draggable>
@@ -445,7 +445,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
                     // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
                     // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
                     // assign this person to the smallest team
-                    if (minDupeTeamIndex >= MAX_TEAM_SIZE) {
+                    if (minDupeTeamSize >= MAX_TEAM_SIZE) {
                         teamIndex = argMin(teams.map((team) => (team.shape[0])))
                     } else {
                         teamIndex = minDupeTeamIndex
@@ -587,7 +587,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
 
         if (!afterRender) return;
         // here DOM is loaded and you can query DOM elements
-        findBestTeams(emba, 1)
+        findBestTeams(emba, 7500)
         setAfterRender(false)
     }, [afterRender])
      
