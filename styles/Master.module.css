@@ -1,0 +1,26 @@
+.csvReader {
+    /* display: flex; */
+    text-align: center;
+    flex-direction: row;
+    padding-bottom: 2rem;
+}
+
+.btn {
+    background-color: #003262;
+    border: #003262;
+  }
+  
+.btn:hover {
+    background-color: #3b7ea1;
+    border: #3b7ea1;
+}
+
+.btn:active:hover {
+    background-color: #3b7ea1;
+    border: #3b7ea1;
+}
+
+.progressBarBackgroundColor {
+    /* background-color: green; */
+    margin-bottom: 2rem;
+}

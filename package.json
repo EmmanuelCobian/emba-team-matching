@@ -9,8 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "boostrap": "^2.0.0",
+    "bootstrap": "^5.3.1",
+    "bootstrap-icons": "^1.10.5",
+    "classnames": "^2.3.2",
+    "danfojs": "^1.1.2",
     "next": "13.4.12",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-beautiful-dnd": "^13.1.1",
+    "react-bootstrap": "^2.8.0",
+    "react-dom": "18.2.0",
+    "react-papaparse": "^4.1.0"
   }
 }
