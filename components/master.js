@@ -113,7 +113,6 @@ function ErrorCatch({ jumpTo, category }) {
             </Col>
             <Col>
                 <li>FN</li>
-                <li>Empty cell</li>
             </Col>
         </Row>
     } else if (category == 'Industries') {
@@ -289,8 +288,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
     }
 
     function getNumVetsPerTeam(teams, vetOptions) {
-        let allowedValues = vetOptions.slice()
-        allowedValues.push(...[null, ''])
         let result = []
         for (let i = 0; i < teams.length; i++) {
             let vets = teams[i]['Military Status'].values
@@ -299,8 +296,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
                 let vet = vets[j]
                 if (vetOptions.includes(vet)) {
                     numVets += 1
-                } else if (!allowedValues.includes(vet)) {
-                    throw new Error('not a valid vet status')
                 }
             }
             result.push(numVets)
@@ -309,7 +304,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
     }
 
     function getNumIntPerTeam(teams, internationalStatus) {
-        const allowedValues = ['', 'FN', 'US', 'PR', null]
         let result = []
         for (let i = 0; i < teams.length; i++) {
             const citizenStatus = teams[i]['Citizen Status'].values
@@ -318,8 +312,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
                 let status = citizenStatus[j]
                 if (status == internationalStatus) {
                     numInt += 1
-                } else if (!allowedValues.includes(status)) {
-                    throw new Error('citizen status error')
                 }
             }
             result.push(numInt)
@@ -336,8 +328,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
                 let gender = genders[j]
                 if (gender == 'Woman') {
                     numWomen += 1
-                } else if (gender != 'Man' && gender != null) {
-                    throw new Error('wrong inputs')
                 }
             }
             result.push(numWomen)
@@ -378,9 +368,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         let row = data.loc({rows:[i]})
         let gender = row['Gender'].iat(0)
         if (gender != 'Woman') {
-            if (gender != 'Man') {
-                throw new Error('Gender error')
-            }
             continue
         }
 
@@ -437,9 +424,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let row = data.loc({ rows:[i] })
             let militaryStatus = row['Military Status'].iat(0)
             if (!vetStatusOptions.includes(militaryStatus)) {
-                if (militaryStatus != '') {
-                    throw new Error('military status error')
-                }
                 continue
             }
 
@@ -478,7 +462,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         - this can or cannot assign the remaining people. Depending on the number of international students left
         */
        const internationalStatus = 'FN'
-       const allowedValues = ['FN', 'US', 'PR', '']
        let numInternationals = getNumIntPerTeam(teams, internationalStatus)
        let minInternationals = 1
        let teamIndex = 0
@@ -489,9 +472,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         let row = data.loc({ rows:[i] })
         let citizenStatus = row['Citizen Status'].iat(0)
         if (citizenStatus != internationalStatus) {
-            if (!allowedValues.includes(citizenStatus)) {
-                throw new Error('citizen status error')
-            }
             continue
         }
 
@@ -579,6 +559,54 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
     }
 
     useEffect(() => {
+        function checkValues(values, allowedValues, category) {
+            for (let i = 0; i < values.shape[0]; i++) {
+                let value = values.iat(i)
+                if (!allowedValues.includes(value)) {
+                    catchError('error', category)
+                    throw new Error(category + ' error')
+                }
+            }
+        }
+
+        function dataValidation(data) {
+            let uniqueValues
+            let allowedValues
+
+            // validate gender column
+            if (!data.columns.includes('Gender')) {
+                catchError('error', 'Gender')
+                throw new Error('gender error')
+            } 
+            uniqueValues = data['Gender'].unique()
+            allowedValues = ['Man', 'Woman']
+            checkValues(uniqueValues, allowedValues, 'Gender')
+            
+            // validate military column
+            if (!data.columns.includes('Military Status')) {
+                catchError('error', 'Military')
+                throw new Error('military error')
+            }
+            uniqueValues = data['Military Status'].unique()
+            allowedValues = ['Army', 'Air Force', 'Navy', 'Marine Corps', '']
+            checkValues(uniqueValues, allowedValues, 'Military')
+
+            // validate internationals column
+            if (!data.columns.includes('Citizen Status')) {
+                catchError('error', 'Internationals')
+                throw new Error('internationals error')
+            }
+            uniqueValues = data['Citizen Status'].unique()
+            allowedValues = ['FN', 'US', 'PR']
+            checkValues(uniqueValues, allowedValues, 'Internationals')
+
+            // validate industry column
+            if (!data.columns.includes('Industry')) {
+                catchError('error', 'Industries')
+                throw new Error('industry error')
+            }
+        }   
+
         function scoreOneTeam(team, weights) {
             if (team.count().values[0] == 0) {
                 return 0
@@ -655,33 +683,13 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             for (let i = 0; i < rankings.length; i++) {
                 let rank = rankings[i].item
                 if (rank == 'Gender') {
-                    try {
-                        ongoing = assignWomen(ongoing.data, ongoing.teams)
-                    } catch (err) {
-                        catchError('error', 'Gender')
-                        return
-                    }
+                    ongoing = assignWomen(ongoing.data, ongoing.teams)
                 } else if (rank == 'Military') {
-                    try {
-                        ongoing = assignVets(ongoing.data, ongoing.teams)
-                    } catch (err) {
-                        catchError('error', 'Military')
-                        return
-                    }
+                    ongoing = assignVets(ongoing.data, ongoing.teams)
                 } else if (rank == 'Citizen Status') {
-                    try {
-                        ongoing = assignInternationals(ongoing.data, ongoing.teams)
-                    } catch (err) {
-                        catchError('error', 'Internationals')
-                        return
-                    }
+                    ongoing = assignInternationals(ongoing.data, ongoing.teams)
                 } else if (rank == 'Industry') {
-                    try {
-                        ongoing = assignIndustries(ongoing.data, ongoing.teams)
-                    } catch (err) {
-                        catchError('error', 'Industries')
-                        return
-                    }
+                    ongoing = assignIndustries(ongoing.data, ongoing.teams)
                 } else {
                     ongoing = ongoing
                 }
@@ -690,7 +698,12 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         }
 
         async function findBestTeams(data, nIterations) {
-           console.log('max team size:', MAX_TEAM_SIZE)
+            try {
+                dataValidation(data)
+            } catch (error) {
+                return
+            }
+            console.log('max team size:', MAX_TEAM_SIZE)
             let bestTeams = []
             let bestScore = Infinity
             let bestSeed = 0
@@ -699,9 +712,6 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let progress = 0
             for (let i = 0; i < nIterations; i++) {
                 let iterResult = await oneIteration(data)
-                if (!iterResult) {
-                    return
-                }
                 let score = await scoreIteration(iterResult.teams)
                 if (score < bestScore) {
                     bestScore = score
@@ -726,8 +736,8 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
     }, [afterRender])
      
      useEffect(() => {
-        setAfterRender(true); // (1) will be called after DOM rendered
-     }, [rerender]);
+        setAfterRender(true) // (1) will be called after DOM rendered
+     }, [rerender])
 
     return (
         <>
