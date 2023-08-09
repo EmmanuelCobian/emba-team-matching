@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Button } from 'react-bootstrap'
+import { Container, Button, Row, Col } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Form from 'react-bootstrap/Form'
@@ -22,6 +22,7 @@ export default function Master() {
     const [rankings, setRankings] = useState([])
     const [numTeams, setNumTeams] = useState()
     const [step, setStep] = useState('file')
+    const [errMsg, setErrMsg] = useState('')
 
     const updateInputData = (results) => {
         setInputData(previousState => {
@@ -45,6 +46,11 @@ export default function Master() {
         setStep(nextStage)
     }
 
+    function catchError(nextStage, error) {
+        setStep(nextStage)
+        setErrMsg(error)
+    }
+
     function handleChange() {
         switch (step) {
             case 'file':
@@ -52,9 +58,11 @@ export default function Master() {
             case 'params':
                 return <GetParams dataLen={inputData.data.length} updateNumTeams={updateNumTeams} updateRankings={updateRankings} jumpTo={jumpTo}/>
             case 'process':
-                return <ProcessData inputData={inputData} numTeams={numTeams} rankings={rankings} updateTeams={updateTeams} jumpTo={jumpTo}/>
+                return <ProcessData inputData={inputData} numTeams={numTeams} rankings={rankings} updateTeams={updateTeams} jumpTo={jumpTo} catchError={catchError}/>
             case 'display':
                 return <DisplayResults inputData={finalTeams} jumpTo={jumpTo}/>
+            case 'error':
+                return <ErrorCatch jumpTo={jumpTo} category={errMsg}/>
             default:
                 return <p>default content</p>
         }
@@ -63,6 +71,87 @@ export default function Master() {
     return (
         <div>
             {handleChange()}
+        </div>
+    )
+}
+
+function ErrorCatch({ jumpTo, category }) {
+    let colName = ''
+    let allowedTypes = ''
+    if (category == 'Gender') {
+        colName = 'Gender'
+        allowedTypes = 
+        <Row>
+            <Col>
+                <li>Woman</li>
+            </Col>
+            <Col>
+                <li>Man</li>
+            </Col>
+        </Row>
+    } else if (category == 'Military') {
+        colName = 'Military Status'
+        allowedTypes = 
+        <Row>
+            <Col>
+                <li>Army</li>
+                <li>Air Force</li>
+                <li>Navy</li>
+            </Col>
+            <Col>
+                <li>Marine Corps</li>
+                <li>Empty cell</li>
+            </Col>
+        </Row>
+    } else if (category == 'Internationals') {
+        colName = 'Citizen Status'
+        allowedTypes = 
+        <Row>
+            <Col>
+                <li>US</li>
+                <li>PR</li>
+            </Col>
+            <Col>
+                <li>FN</li>
+                <li>Empty cell</li>
+            </Col>
+        </Row>
+    } else if (category == 'Industries') {
+        colName = 'Industry'
+        allowedTypes = 
+        <Row>
+            <Col>
+                <li>Any non-numerical value</li>
+            </Col>
+            <Col>
+                <li>Empty cell</li>
+            </Col>
+        </Row>
+    }
+    return (
+        <div>
+            <p className='text-center'>An error was encountered with the <span className='fw-bold'>{category}</span> column. Please double check that your .csv file aligns with the requirements.</p>
+            <Table hover bordered responsive striped className='w-75 mx-auto'>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Allowed Values</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{colName}</td>
+                        <td>
+                            <ul>
+                                {allowedTypes}
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </Table>
+            <div className='text-center'>
+                <Button className={classnames(styles.btn, 'mb-3')} onClick={() => jumpTo('file')}>Start Again</Button>
+            </div>
         </div>
     )
 }
@@ -165,7 +254,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     )
 }
 
-function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
+function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catchError }) {
     let emba = new dfd.DataFrame(inputData.data)
     const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams)
     const [now, setNow] = useState(0)
@@ -200,13 +289,18 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
     }
 
     function getNumVetsPerTeam(teams, vetOptions) {
+        let allowedValues = vetOptions.slice()
+        allowedValues.push(...[null, ''])
         let result = []
         for (let i = 0; i < teams.length; i++) {
-            const vets = teams[i]['Military Status'].values
+            let vets = teams[i]['Military Status'].values
             let numVets = 0
-            for (const vet of vets) {
+            for (let j = 0; j < vets.length; j++) {
+                let vet = vets[j]
                 if (vetOptions.includes(vet)) {
                     numVets += 1
+                } else if (!allowedValues.includes(vet)) {
+                    throw new Error('not a valid vet status')
                 }
             }
             result.push(numVets)
@@ -215,6 +309,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
     }
 
     function getNumIntPerTeam(teams, internationalStatus) {
+        const allowedValues = ['', 'FN', 'US', 'PR', null]
         let result = []
         for (let i = 0; i < teams.length; i++) {
             const citizenStatus = teams[i]['Citizen Status'].values
@@ -223,6 +318,8 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
                 let status = citizenStatus[j]
                 if (status == internationalStatus) {
                     numInt += 1
+                } else if (!allowedValues.includes(status)) {
+                    throw new Error('citizen status error')
                 }
             }
             result.push(numInt)
@@ -239,6 +336,8 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
                 let gender = genders[j]
                 if (gender == 'Woman') {
                     numWomen += 1
+                } else if (gender != 'Man' && gender != null) {
+                    throw new Error('wrong inputs')
                 }
             }
             result.push(numWomen)
@@ -267,18 +366,23 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
         - min number of women per team = 2
         - if each team already has 2 women, go back to the start and assign 1 more iteratively until there's no more
         - if there's only 1 women in a team, assign that women to the next team with the least amount of women
-        TODO: use boolean masks instead of iterating through all the data
         */
+
        let teamIndex = 0
        let minNumWomen = 2
        let numWomen = getNumWomenPerTeam(teams)
+       let numRows = data.shape[0]
        data = data.resetIndex()
-       let womenOnly = data.iloc({ rows: data["Gender"].eq("Woman") })
-       womenOnly = womenOnly.resetIndex()
-       let numRows = womenOnly.shape[0]
 
        for (let i = 0; i < numRows; i++) {
-        let row = womenOnly.loc({rows:[i]})
+        let row = data.loc({rows:[i]})
+        let gender = row['Gender'].iat(0)
+        if (gender != 'Woman') {
+            if (gender != 'Man') {
+                throw new Error('Gender error')
+            }
+            continue
+        }
 
         let startIndex = teamIndex
         while ((numWomen[teamIndex] >= minNumWomen) || 
@@ -292,8 +396,9 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
             }
         }
 
-        teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1)
         numWomen[teamIndex] += 1
+        teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1)
+        data = data.drop({ index:[i] })
     }
 
     if (numWomen[teamIndex] == 1) {
@@ -312,7 +417,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
         teamIndex = argMin(nWomenFilter)
         teams[teamIndex] = handleAppend(teams[teamIndex], lastPersonAdded, teamIndex + 1)
     }
-        return {data:data.iloc({ rows: data['Gender'].eq('Man') }), teams:teams}
+        return {data:data, teams:teams}
     }
 
     function assignVets(data, teams) {
@@ -320,9 +425,8 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
         - Military students should be separated as much as possible, including their branch
         - assign them to a team that isn't full and doesn't already have a vet
         - if all teams have a vet, assign them to the team that has the least number of vets
-        TODO: use boolean mask instead of iterating through all the data
         */
-        const vetStatusOptions = ['Army', 'Air Force', 'Navy', 'Marine Corps']
+        const vetStatusOptions = ['Air Force', 'Army', 'Marine Corps', 'Navy']
         let numVets = getNumVetsPerTeam(teams, vetStatusOptions)
         let minVetNum = 1
         let teamIndex = 0
@@ -333,6 +437,9 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
             let row = data.loc({ rows:[i] })
             let militaryStatus = row['Military Status'].iat(0)
             if (!vetStatusOptions.includes(militaryStatus)) {
+                if (militaryStatus != '') {
+                    throw new Error('military status error')
+                }
                 continue
             }
 
@@ -371,6 +478,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
         - this can or cannot assign the remaining people. Depending on the number of international students left
         */
        const internationalStatus = 'FN'
+       const allowedValues = ['FN', 'US', 'PR', '']
        let numInternationals = getNumIntPerTeam(teams, internationalStatus)
        let minInternationals = 1
        let teamIndex = 0
@@ -381,6 +489,9 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
         let row = data.loc({ rows:[i] })
         let citizenStatus = row['Citizen Status'].iat(0)
         if (citizenStatus != internationalStatus) {
+            if (!allowedValues.includes(citizenStatus)) {
+                throw new Error('citizen status error')
+            }
             continue
         }
 
@@ -544,13 +655,33 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
             for (let i = 0; i < rankings.length; i++) {
                 let rank = rankings[i].item
                 if (rank == 'Gender') {
-                    ongoing = assignWomen(ongoing.data, ongoing.teams)
+                    try {
+                        ongoing = assignWomen(ongoing.data, ongoing.teams)
+                    } catch (err) {
+                        catchError('error', 'Gender')
+                        return
+                    }
                 } else if (rank == 'Military') {
-                    ongoing = assignVets(ongoing.data, ongoing.teams)
+                    try {
+                        ongoing = assignVets(ongoing.data, ongoing.teams)
+                    } catch (err) {
+                        catchError('error', 'Military')
+                        return
+                    }
                 } else if (rank == 'Citizen Status') {
-                    ongoing = assignInternationals(ongoing.data, ongoing.teams)
+                    try {
+                        ongoing = assignInternationals(ongoing.data, ongoing.teams)
+                    } catch (err) {
+                        catchError('error', 'Internationals')
+                        return
+                    }
                 } else if (rank == 'Industry') {
-                    ongoing = assignIndustries(ongoing.data, ongoing.teams)
+                    try {
+                        ongoing = assignIndustries(ongoing.data, ongoing.teams)
+                    } catch (err) {
+                        catchError('error', 'Industries')
+                        return
+                    }
                 } else {
                     ongoing = ongoing
                 }
@@ -568,6 +699,9 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
             let progress = 0
             for (let i = 0; i < nIterations; i++) {
                 let iterResult = await oneIteration(data)
+                if (!iterResult) {
+                    return
+                }
                 let score = await scoreIteration(iterResult.teams)
                 if (score < bestScore) {
                     bestScore = score
@@ -587,7 +721,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo }) {
 
         if (!afterRender) return;
         // here DOM is loaded and you can query DOM elements
-        findBestTeams(emba, 7500)
+        findBestTeams(emba, 1)
         setAfterRender(false)
     }, [afterRender])
      
