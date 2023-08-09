@@ -248,6 +248,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                     <Form.Control required type='number' onChange={onInput} value={numTeams} min={1} max={dataLen} className={classnames('w-25', 'mb-3')}/>
                 </Form.Group>
                 <Button type='submit' className={classnames('mb-3', styles.btn)}>Continue</Button>
+                <Button onClick={() => jumpTo('file')} className={classnames('mb-3 ms-2', styles.btn)}>Restart</Button>
             </Form>
         </>
     )
@@ -558,54 +559,55 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         return {data:data, teams:teams}
     }
 
-    useEffect(() => {
-        function checkValues(values, allowedValues, category) {
-            for (let i = 0; i < values.shape[0]; i++) {
-                let value = values.iat(i)
-                if (!allowedValues.includes(value)) {
-                    catchError('error', category)
-                    throw new Error(category + ' error')
-                }
+    function dataValidation(data) {
+        let uniqueValues
+        let allowedValues
+
+        // validate gender column
+        if (!data.columns.includes('Gender')) {
+            catchError('error', 'Gender')
+            throw new Error('gender error')
+        } 
+        uniqueValues = data['Gender'].unique()
+        allowedValues = ['Man', 'Woman']
+        checkValues(uniqueValues, allowedValues, 'Gender')
+        
+        // validate military column
+        if (!data.columns.includes('Military Status')) {
+            catchError('error', 'Military')
+            throw new Error('military error')
+        }
+        uniqueValues = data['Military Status'].unique()
+        allowedValues = ['Army', 'Air Force', 'Navy', 'Marine Corps', '']
+        checkValues(uniqueValues, allowedValues, 'Military')
+
+        // validate internationals column
+        if (!data.columns.includes('Citizen Status')) {
+            catchError('error', 'Internationals')
+            throw new Error('internationals error')
+        }
+        uniqueValues = data['Citizen Status'].unique()
+        allowedValues = ['FN', 'US', 'PR']
+        checkValues(uniqueValues, allowedValues, 'Internationals')
+
+        // validate industry column
+        if (!data.columns.includes('Industry')) {
+            catchError('error', 'Industries')
+            throw new Error('industry error')
+        }
+    }   
+
+    function checkValues(values, allowedValues, category) {
+        for (let i = 0; i < values.shape[0]; i++) {
+            let value = values.iat(i)
+            if (!allowedValues.includes(value)) {
+                catchError('error', category)
+                throw new Error(category + ' error')
             }
         }
-
-        function dataValidation(data) {
-            let uniqueValues
-            let allowedValues
-
-            // validate gender column
-            if (!data.columns.includes('Gender')) {
-                catchError('error', 'Gender')
-                throw new Error('gender error')
-            } 
-            uniqueValues = data['Gender'].unique()
-            allowedValues = ['Man', 'Woman']
-            checkValues(uniqueValues, allowedValues, 'Gender')
-            
-            // validate military column
-            if (!data.columns.includes('Military Status')) {
-                catchError('error', 'Military')
-                throw new Error('military error')
-            }
-            uniqueValues = data['Military Status'].unique()
-            allowedValues = ['Army', 'Air Force', 'Navy', 'Marine Corps', '']
-            checkValues(uniqueValues, allowedValues, 'Military')
-
-            // validate internationals column
-            if (!data.columns.includes('Citizen Status')) {
-                catchError('error', 'Internationals')
-                throw new Error('internationals error')
-            }
-            uniqueValues = data['Citizen Status'].unique()
-            allowedValues = ['FN', 'US', 'PR']
-            checkValues(uniqueValues, allowedValues, 'Internationals')
-
-            // validate industry column
-            if (!data.columns.includes('Industry')) {
-                catchError('error', 'Industries')
-                throw new Error('industry error')
-            }
-        }   
+    }
+    
+    useEffect(() => {
 
         function scoreOneTeam(team, weights) {
             if (team.count().values[0] == 0) {
@@ -731,7 +733,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
 
         if (!afterRender) return;
         // here DOM is loaded and you can query DOM elements
-        findBestTeams(emba, 1)
+        findBestTeams(emba, 7500)
         setAfterRender(false)
     }, [afterRender])
      
