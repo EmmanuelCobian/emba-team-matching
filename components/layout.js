@@ -20,17 +20,17 @@ export default function Layout({ children }) {
                 </Link>
               </Nav.Item>
               <Nav.Item>
-                <Link href='#about' passHref legacyBehavior>
+                <Link href='/#about' passHref legacyBehavior>
                   <Nav.Link>About</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
-                <Link href='#instructions' passHref legacyBehavior>
+                <Link href='/#instructions' passHref legacyBehavior>
                   <Nav.Link>Instructions</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
-                <Link href='#get-started' passHref legacyBehavior>
+                <Link href='/#get-started' passHref legacyBehavior>
                   <Nav.Link>Get Started</Nav.Link>
                 </Link>
               </Nav.Item>
