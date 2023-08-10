@@ -28,13 +28,21 @@ export default function Instructions() {
         <Row>
             <Col><li>Any numerical value</li></Col>
         </Row>},
+        {name:'Team', allowed:
+        <Row>
+            <Col><li>This column is forbidden from being used in your .csv file</li></Col>
+        </Row>},
+        {name:'#', allowed:
+        <Row>
+            <Col><li>Any column or row containing the "#" character is forbidden from being used in your .csv file</li></Col>
+        </Row>},
     ]
 
     return (
         <Layout>
             <Container>
                 <h3>Input Data Documentation</h3>
-                <p className='my-3'>Below you'll find infomation on the required information your .csv file needs for the team matching process to run successfuly. All of the following requirements must be fufilled as described below for optimal results.</p>
+                <p className='my-3'>Below you'll find information on the required information your .csv file needs for the team matching process to run successfully. Your file may have any number of extra columns from the ones mentioned here, <span className='fw-semibold'>except for a column titled "Team"</span>. All of the following requirements must be fulfilled as described below for optimal results.</p>
                 <Table hover bordered striped className='mb-5'>
                     <thead>
                         <tr>
@@ -44,7 +52,7 @@ export default function Instructions() {
                     </thead>
                     <tbody>
                         {requirements.map(req => (
-                        <tr>
+                        <tr key={req.name}>
                             <td>{req.name}</td>
                             <td><ul className='my-0'>{req.allowed}</ul></td>
                         </tr>
