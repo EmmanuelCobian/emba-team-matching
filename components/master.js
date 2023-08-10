@@ -126,6 +126,12 @@ function ErrorCatch({ jumpTo, category }) {
                 <li>Empty cell</li>
             </Col>
         </Row>
+    } else if (category == 'Team') {
+        colName = 'Team'
+        allowedTypes = 
+        <Row>
+            <Col><li>This column is forbidden from being used in your .csv file</li></Col>
+        </Row>
     }
     return (
         <div>
@@ -271,8 +277,8 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                     <Form.Control required type='number' onChange={onInput} value={numTeams} min={1} max={dataLen} className={classnames('w-25', 'mb-3')}/>
                 </Form.Group>
                 <Form.Group className='d-flex justify-content-center mb-4'>
-                    <Button type='submit' className={classnames(styles.btn)}>Continue</Button>
-                    <Button onClick={() => jumpTo('file')} className={classnames('ms-2', styles.btn)}>Restart</Button>
+                    <Button onClick={() => jumpTo('file')} className={classnames(styles.btn)}>Restart</Button>
+                    <Button type='submit' className={classnames('ms-2', styles.btn)}>Continue</Button>
                 </Form.Group>
             </Form>
         </>
@@ -620,6 +626,12 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             catchError('error', 'Industries')
             throw new Error('industry error')
         }
+
+        // make sure there isn't a column called "Team"
+        if (data.columns.includes('Team')) {
+            catchError('error', 'Team')
+            throw new Error('forbidden column')
+        }
     }   
 
     function checkValues(values, allowedValues, category) {
@@ -645,12 +657,12 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let internationals = team['Citizen Status'].eq('FN')
     
             let numWomen = genders.eq('Woman').sum()
-            let numVets = vets.unique().shape[0]
+            let numVets = vets.shape[0]
             let numDiffIndustries = industries.unique().shape[0]
             let medianAge = age.median()
             let numInternationals = internationals.sum()
             
-            let score = (numWomen * weights[0]) + (numInternationals * weights[1]) + (numVets * weights[2]) + (numDiffIndustries * weights[3]) + (medianAge * weights[4])
+            let score = 0
             for (let i = 0; i < rankings.length; i++) {
                 let rank = rankings[i].item
                 let weight = weights[i]
