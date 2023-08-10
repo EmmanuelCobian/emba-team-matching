@@ -11,13 +11,13 @@
   }
   
 .btn:hover {
-    background-color: #3b7ea1;
-    border: #3b7ea1;
+    background-color: #C4820E;
+    border: #C4820E;
 }
 
 .btn:active:hover {
-    background-color: #3b7ea1;
-    border: #3b7ea1;
+    background-color: #C4820E;
+    border: #C4820E;
 }
 
 .progressBarBackgroundColor {

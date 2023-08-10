@@ -216,21 +216,44 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         setFinalRankings(items)
     }
 
+    function getItemStyle(isDragging, draggableStyle) {
+        return {
+            // some basic styles to make the items look a bit nicer
+            userSelect: "none",
+            padding: 8 * 2,
+            margin: `0 0 8px 0`,
+
+            // change background colour if dragging
+            background: isDragging ? "#C4820E" : "#003262",
+            color: isDragging ? "#fff" : "#fff",
+
+            // styles we need to apply on draggables
+            ...draggableStyle
+        }
+    }
+
     return (
         <>
-            <p className={classnames('text-start')}>Please complete the following information</p>
-            <Form onSubmit={handleSubmit}> 
-                <Form.Group>
-                    <Form.Label>Drag and drop the rankings with highest priority at the top and lowest at the bottom</Form.Label>
+            <Form onSubmit={handleSubmit} className='mt-5'> 
+                <Form.Group className='w-75 mx-auto text-center'>
+                    <Form.Label >Drag and drop the rankings with highest priority at the top and lowest at the bottom</Form.Label>
                     <DragDropContext onDragEnd={handleOnDragEnd} >
                         <Droppable droppableId='rankings' >
                             {(provided) => (
-                                <ListGroup className={classnames('rankings', 'mb-4', 'w-50')} {...provided.droppableProps} ref={provided.innerRef}>
+                                <ListGroup className={classnames('rankings mb-4 w-100 text-start')} {...provided.droppableProps} ref={provided.innerRef}>
                                     {finalRankings.map(({item, icon}, index) => {
                                         return (
                                             <Draggable key={item} draggableId={item} index={index}>
-                                                {(provided) => (
-                                                    <ListGroup.Item ref={provided.innerRef} {...provided.dragHandleProps} {...provided.draggableProps}>
+                                                {(provided, snapshot) => (
+                                                    <ListGroup.Item 
+                                                    ref={provided.innerRef} 
+                                                    {...provided.dragHandleProps} 
+                                                    {...provided.draggableProps}
+                                                    style={getItemStyle(
+                                                        snapshot.isDragging,
+                                                        provided.draggableProps.style
+                                                    )}
+                                                    >
                                                         <i className={classnames(icon, 'me-2')}/>{item}
                                                     </ListGroup.Item>
                                                 )}
@@ -243,12 +266,14 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                         </Droppable>
                     </DragDropContext>
                 </Form.Group>
-                <Form.Group>
+                <Form.Group className='align-items-center d-flex flex-column'>
                     <Form.Label>Number of Groups</Form.Label>
                     <Form.Control required type='number' onChange={onInput} value={numTeams} min={1} max={dataLen} className={classnames('w-25', 'mb-3')}/>
                 </Form.Group>
-                <Button type='submit' className={classnames('mb-3', styles.btn)}>Continue</Button>
-                <Button onClick={() => jumpTo('file')} className={classnames('mb-3 ms-2', styles.btn)}>Restart</Button>
+                <Form.Group className='d-flex justify-content-center mb-4'>
+                    <Button type='submit' className={classnames(styles.btn)}>Continue</Button>
+                    <Button onClick={() => jumpTo('file')} className={classnames('ms-2', styles.btn)}>Restart</Button>
+                </Form.Group>
             </Form>
         </>
     )
