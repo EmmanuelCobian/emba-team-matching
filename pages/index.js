@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { Container, Row, Col, Button } from 'react-bootstrap'
 import Card from 'react-bootstrap/Card'
 import classnames from 'classnames'
@@ -35,10 +36,10 @@ export default function Home() {
             <Col md className='my-2'>
               <Card>
                 <div className={classnames('mt-2', styles.cardIcon)}><i className={classnames('bi bi-upload',)}></i></div>
-                <Card.Body>
+                <Card.Body className='text-center'>
                   <Card.Title>Upload Data</Card.Title>
                   <Card.Text>
-                    Start by uploading your .csv file containing student data. All the processing and handling of your data is done locally. For more information on what your file should look like on upload, check out <a href='./instructions'>this resource</a>.
+                    Start by uploading your .csv file containing student data. For more information on what your file should look like on upload, check out <Link href='./instructions'>this resource</Link>.
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -46,10 +47,10 @@ export default function Home() {
             <Col md className='my-2'>
               <Card>
                 <div className={classnames('mt-2', styles.cardIcon)}><i className={classnames('bi bi-ui-checks',)}></i></div>
-                <Card.Body>
+                <Card.Body className='text-center'>
                   <Card.Title>Provide Details</Card.Title>
                   <Card.Text>
-                    You will be asked to provide a ranking of criteria and the number of teams you would like to create. Feel free to play around with the categories.
+                    You will be asked to provide a ranking of criteria and the number of teams you would like to create. Adjust the parameters to what best suits your needs.
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -57,10 +58,10 @@ export default function Home() {
             <Col md className='my-2'>
               <Card>
               <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-hand-thumbs-up'></i></div>
-                <Card.Body>
+                <Card.Body className='text-center'>
                   <Card.Title>Get Results</Card.Title>
                   <Card.Text>
-                    View and download the results. You can also restart the process and try again with different data, team sizes, or criteria. 
+                    View and download the results. You can also restart the process and try again with different data, team sizes, or criteria.
                   </Card.Text>
                 </Card.Body>
               </Card>

@@ -14,24 +14,24 @@ export default function Layout({ children }) {
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav' className='justify-content-end'>
             <Nav>
-              <Nav.Item>
-                <Link href='/' passHref legacyBehavior>
-                  <Nav.Link>Home</Nav.Link>
+              <Nav.Item >
+                <Link href='/' passHref legacyBehavior >
+                  <Nav.Link className={styles.navItem}>Home</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
                 <Link href='/#about' passHref legacyBehavior>
-                  <Nav.Link>About</Nav.Link>
+                  <Nav.Link className={styles.navItem}>About</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
                 <Link href='/#instructions' passHref legacyBehavior>
-                  <Nav.Link>Instructions</Nav.Link>
+                  <Nav.Link className={styles.navItem}>Instructions</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
                 <Link href='/#get-started' passHref legacyBehavior>
-                  <Nav.Link>Get Started</Nav.Link>
+                  <Nav.Link className={styles.navItem}>Get Started</Nav.Link>
                 </Link>
               </Nav.Item>
             </Nav>

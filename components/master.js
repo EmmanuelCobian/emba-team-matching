@@ -9,6 +9,7 @@ import Tab from 'react-bootstrap/Tab'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { useCSVReader } from 'react-papaparse'
 import classnames from 'classnames'
+import BouncingDots from '@/components/dots'
 import styles from '../styles/Master.module.css'
 import * as dfd from 'danfojs'
 
@@ -239,49 +240,47 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     }
 
     return (
-        <>
-            <Form onSubmit={handleSubmit} className='mt-5'> 
-                <Form.Group className='w-75 mx-auto text-center'>
-                    <Form.Label >Drag and drop the rankings with highest priority at the top and lowest at the bottom</Form.Label>
-                    <DragDropContext onDragEnd={handleOnDragEnd} >
-                        <Droppable droppableId='rankings' >
-                            {(provided) => (
-                                <ListGroup className={classnames('rankings mb-4 w-100 text-start')} {...provided.droppableProps} ref={provided.innerRef}>
-                                    {finalRankings.map(({item, icon}, index) => {
-                                        return (
-                                            <Draggable key={item} draggableId={item} index={index}>
-                                                {(provided, snapshot) => (
-                                                    <ListGroup.Item 
-                                                    ref={provided.innerRef} 
-                                                    {...provided.dragHandleProps} 
-                                                    {...provided.draggableProps}
-                                                    style={getItemStyle(
-                                                        snapshot.isDragging,
-                                                        provided.draggableProps.style
-                                                    )}
-                                                    >
-                                                        <i className={classnames(icon, 'me-2')}/>{item}
-                                                    </ListGroup.Item>
+        <Form onSubmit={handleSubmit} className='mt-5'> 
+            <Form.Group className='w-75 mx-auto text-center'>
+                <Form.Label >Drag and drop the rankings with highest priority at the top and lowest at the bottom</Form.Label>
+                <DragDropContext onDragEnd={handleOnDragEnd} >
+                    <Droppable droppableId='rankings' >
+                        {(provided) => (
+                            <ListGroup className={classnames('rankings mb-4 w-100 text-start')} {...provided.droppableProps} ref={provided.innerRef}>
+                                {finalRankings.map(({item, icon}, index) => {
+                                    return (
+                                        <Draggable key={item} draggableId={item} index={index}>
+                                            {(provided, snapshot) => (
+                                                <ListGroup.Item 
+                                                ref={provided.innerRef} 
+                                                {...provided.dragHandleProps} 
+                                                {...provided.draggableProps}
+                                                style={getItemStyle(
+                                                    snapshot.isDragging,
+                                                    provided.draggableProps.style
                                                 )}
-                                            </Draggable>
-                                        )
-                                    })}
-                                    {provided.placeholder}
-                                </ListGroup>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
-                </Form.Group>
-                <Form.Group className='align-items-center d-flex flex-column'>
-                    <Form.Label>Number of Groups</Form.Label>
-                    <Form.Control required type='number' onChange={onInput} value={numTeams} min={1} max={dataLen} className={classnames('w-25', 'mb-3')}/>
-                </Form.Group>
-                <Form.Group className='d-flex justify-content-center mb-4'>
-                    <Button onClick={() => jumpTo('file')} className={classnames(styles.btn)}>Restart</Button>
-                    <Button type='submit' className={classnames('ms-2', styles.btn)}>Continue</Button>
-                </Form.Group>
-            </Form>
-        </>
+                                                >
+                                                    <i className={classnames(icon, 'me-2')}/>{item}
+                                                </ListGroup.Item>
+                                            )}
+                                        </Draggable>
+                                    )
+                                })}
+                                {provided.placeholder}
+                            </ListGroup>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+            </Form.Group>
+            <Form.Group className='align-items-center d-flex flex-column'>
+                <Form.Label>Number of Groups</Form.Label>
+                <Form.Control required type='number' onChange={onInput} value={numTeams} min={1} max={dataLen} className={classnames('w-25', 'mb-3')}/>
+            </Form.Group>
+            <Form.Group className='d-flex justify-content-center mb-4'>
+                <Button onClick={() => jumpTo('file')} className={classnames(styles.btn)}>Restart</Button>
+                <Button type='submit' className={classnames('ms-2', styles.btn)}>Continue</Button>
+            </Form.Group>
+        </Form>
     )
 }
 
@@ -632,6 +631,9 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             catchError('error', 'Team')
             throw new Error('forbidden column')
         }
+
+        // check that there aren't any # characters
+
     }   
 
     function checkValues(values, allowedValues, category) {
@@ -770,7 +772,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
 
         if (!afterRender) return;
         // here DOM is loaded and you can query DOM elements
-        findBestTeams(emba, 7500)
+        findBestTeams(emba, 10000)
         setAfterRender(false)
     }, [afterRender])
      
@@ -789,7 +791,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             `}
             </style>
             <div className={classnames('text-center')}>
-                <p>working on the results</p>
+                <p>Compiling the teams...</p>
                 <ProgressBar animated variant="cal" now={now} label={`${Math.round(now)}%`} className='my-4'/>
             </div>
         </>

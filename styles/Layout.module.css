@@ -3,6 +3,14 @@
     padding: 0;
 }
 
+.navItem {
+    color: #46535E ;
+}
+
+.navItem:hover {
+    color: #C4820E ;
+}
+
 .footer {
     background-color: #46535E;
     color: #fff;
