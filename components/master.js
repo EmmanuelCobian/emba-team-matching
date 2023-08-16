@@ -104,8 +104,8 @@ function ErrorCatch({ jumpTo, category }) {
                 <li>Empty cell</li>
             </Col>
         </Row>
-    } else if (category == 'Internationals') {
-        colName = 'Citizen Status'
+    } else if (category == 'Citizenship') {
+        colName = 'Citizenship Status'
         allowedTypes = 
         <Row>
             <Col>
@@ -200,7 +200,7 @@ function FileUpload({ updateInputData, jumpTo }) {
 
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     const rankings = [
-        {item:'Gender', icon:'bi bi-gender-ambiguous'}, {item:'Military', icon:'bi bi-wrench'}, {item:'Citizen Status', icon:'bi bi-flag'}, {item:'Industry', icon:'bi bi-briefcase'}, {item:'Age', icon:'bi bi-universal-access'},]
+        {item:'Gender', icon:'bi bi-gender-ambiguous'}, {item:'Military', icon:'bi bi-wrench'}, {item:'Citizenship Status', icon:'bi bi-globe-americas'}, {item:'Industry', icon:'bi bi-briefcase'}, {item:'Age', icon:'bi bi-universal-access'},]
     const [finalRankings, setFinalRankings] = useState(rankings)
     const [numTeams, setNumTeams] = useState('')
     const onInput = ({target: {value}}) => (setNumTeams(value))
@@ -337,7 +337,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
     function getNumIntPerTeam(teams, internationalStatus) {
         let result = []
         for (let i = 0; i < teams.length; i++) {
-            const citizenStatus = teams[i]['Citizen Status'].values
+            const citizenStatus = teams[i]['Citizenship Status'].values
             let numInt = 0
             for (let j = 0; j < citizenStatus.length; j++) {
                 let status = citizenStatus[j]
@@ -501,7 +501,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
 
        for (let i = 0; i < numRows; i++) {
         let row = data.loc({ rows:[i] })
-        let citizenStatus = row['Citizen Status'].iat(0)
+        let citizenStatus = row['Citizenship Status'].iat(0)
         if (citizenStatus != internationalStatus) {
             continue
         }
@@ -612,13 +612,13 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         checkValues(uniqueValues, allowedValues, 'Military')
 
         // validate internationals column
-        if (!data.columns.includes('Citizen Status')) {
-            catchError('error', 'Internationals')
-            throw new Error('internationals error')
+        if (!data.columns.includes('Citizenship Status')) {
+            catchError('error', 'Citizenship')
+            throw new Error('citizenship status error')
         }
-        uniqueValues = data['Citizen Status'].unique()
+        uniqueValues = data['Citizenship Status'].unique()
         allowedValues = ['FN', 'US', 'PR']
-        checkValues(uniqueValues, allowedValues, 'Internationals')
+        checkValues(uniqueValues, allowedValues, 'Citizenship')
 
         // validate industry column
         if (!data.columns.includes('Industry')) {
@@ -656,7 +656,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let vets = team['Military Status']
             let industries = team['Industry']
             let age = team['Age']
-            let internationals = team['Citizen Status'].eq('FN')
+            let internationals = team['Citizenship Status'].eq('FN')
     
             let numWomen = genders.eq('Woman').sum()
             let numVets = vets.shape[0]
@@ -672,7 +672,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
                     score += numWomen * weight
                 } else if (rank == 'Military') {
                     score += numVets * weight
-                } else if (rank == 'Citizen Status') {
+                } else if (rank == 'Citizenship Status') {
                     score += numInternationals * weight
                 } else if (rank == 'Industry') {
                     score += numDiffIndustries * weight
@@ -717,7 +717,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let cols = ['Team']
             let numCols = cols.push(...data.columns)
             teams.fill(new dfd.DataFrame([Array(numCols).fill(null)], {columns: cols}))
-            // army problem: seed, 0.005857852797082286, teams, 7, rankings, default
+            // military army example: seed, 0.1172232770299626, teams, 7, rankings, default
             let seed = Math.random()
             let shuffledData = await data.sample(data.shape[0], {seed:seed})
             let ongoing = {data:shuffledData, teams:teams}
@@ -727,7 +727,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
                     ongoing = assignWomen(ongoing.data, ongoing.teams)
                 } else if (rank == 'Military') {
                     ongoing = assignVets(ongoing.data, ongoing.teams)
-                } else if (rank == 'Citizen Status') {
+                } else if (rank == 'Citizenship Status') {
                     ongoing = assignInternationals(ongoing.data, ongoing.teams)
                 } else if (rank == 'Industry') {
                     ongoing = assignIndustries(ongoing.data, ongoing.teams)
@@ -812,14 +812,14 @@ function DisplayResults({ inputData, jumpTo }) {
             </div>
             <Tabs
                 defaultActiveKey='1'
-                className={classnames('mb-3')}
+                className='mb-3'
                 variant='underline'
                 justify
             >
                 {inputData.map((team, index) => {
                     return (
                         <Tab eventKey={index + 1} title={`Team ${index + 1}`} key={index}>
-                            <Table striped bordered hover responsive>
+                            <Table striped bordered hover responsive className='mb-4'>
                                 <thead>
                                     <tr>
                                         {team.columns.map((col) => {
