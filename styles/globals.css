@@ -19,3 +19,10 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+::selection {
+  background: #00B0DA;
+}
+::-moz-selection {
+  background: #00B0DA;
+}

@@ -19,7 +19,7 @@ export default function Layout({ children }) {
                   <Nav.Link className={styles.navItem}>Home</Nav.Link>
                 </Link>
               </Nav.Item>
-              <Nav.Item>
+              {/* <Nav.Item>
                 <Link href='/#about' passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>About</Nav.Link>
                 </Link>
@@ -27,6 +27,11 @@ export default function Layout({ children }) {
               <Nav.Item>
                 <Link href='/#instructions' passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>Instructions</Nav.Link>
+                </Link>
+              </Nav.Item> */}
+              <Nav.Item>
+                <Link href='documentation' passHref legacyBehavior>
+                  <Nav.Link className={styles.navItem}>Documentation</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
@@ -42,7 +47,7 @@ export default function Layout({ children }) {
       <main>{children}</main>
 
       <footer className={styles.footer}>
-        <Container className={styles.footer}>
+        <Container>
           <p>Project for UC Berkeley MBA for Executives Program | email@example.com</p>
           <p>Made by Emmanuel Cobian Duarte</p>
         </Container>

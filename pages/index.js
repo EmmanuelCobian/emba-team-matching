@@ -39,7 +39,7 @@ export default function Home() {
                 <Card.Body className='text-center'>
                   <Card.Title>Upload Data</Card.Title>
                   <Card.Text>
-                    Start by uploading your .csv file containing student data. For more information on what your file should look like on upload, check out <Link href='./instructions'>this resource</Link>.
+                    Start by uploading your .csv file containing student data. For more information on what your file should look like on upload, check out the <Link href='documentation'>documentation</Link>.
                   </Card.Text>
                 </Card.Body>
               </Card>

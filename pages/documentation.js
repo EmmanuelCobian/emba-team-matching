@@ -42,7 +42,7 @@ export default function Instructions() {
         <Layout>
             <Container>
                 <h3>Input Data Documentation</h3>
-                <p className='my-3'>Below you'll find information on the required information your .csv file needs for the team matching process to run successfully. Your file may have any number of extra columns from the ones mentioned here, <span className='fw-semibold'>except for columns titled "Team" and containing the "#" character</span>. All of the following requirements must be fulfilled as described below for optimal results.</p>
+                <p className='my-3'>Below you'll find information on the required information your .csv file needs for the team matching process to run successfully. Your file may have any number of extra columns from the ones mentioned here, <span className='fw-semibold'>except for columns titled "Team" and columns/rows containing the "#" character</span>. All of the following requirements must be fulfilled as described below for optimal results.</p>
                 <Table hover bordered striped className='mb-5'>
                     <thead>
                         <tr>
