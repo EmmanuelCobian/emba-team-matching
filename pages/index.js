@@ -24,7 +24,7 @@ export default function Home() {
       <section id='about' className='my-4'>
         <Container>
           <h2>About</h2>
-          <p> Finding the optimal team configuration can be a challenging task. This website uses an approximation algorithm to match teams based on ranked criteria specified by you, the user. This ensures a high-quality solution that closely matches your priorities by efficiently analyzing a wide range of potential team combinations. Though not guaranteed to be the absolute best fit, this algorithm aims to get as close as reasonably possible within the constraints. This data-driven approach takes the guesswork out of team formation, while still allowing you to customize the process based on what matters most to you.
+          <p> Finding the optimal team configuration can be a challenging task. This website uses an approximation algorithm to match teams based on ranked criteria specified by you, the user. This ensures a high-quality solution that closely matches your priorities by efficiently analyzing a wide range of potential team combinations. This algorithm gets as close as possible, within the rankings provided by the user, to the optimal solution. This data-driven approach takes the guesswork out of team formation, while still allowing you to customize the process based on what matters most to you.
           </p>
         </Container>
       </section>
@@ -46,7 +46,7 @@ export default function Home() {
             </Col>
             <Col md className='my-2'>
               <Card>
-                <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-clipboard2-minus'></i></div>
+                <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-ui-checks'></i></div>
                 <Card.Body className='text-center'>
                   <Card.Title>Provide Details</Card.Title>
                   <Card.Text>

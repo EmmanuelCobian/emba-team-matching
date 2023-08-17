@@ -688,7 +688,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
         async function scoreIteration(teams) {
             // given one iteration, find a score and only keep the best one
             // the objective function is minimizing the difference in scores between teams
-            const weights = [0.4, 0.3, 0.2, 0.07, 0.03]
+            const weights = [0.4, 0.35, 0.15, 0.07, 0.03]
             let scores = []
             teams.map((team) => (
                 scores.push(scoreOneTeam(team, weights))
