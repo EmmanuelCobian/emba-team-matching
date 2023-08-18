@@ -659,7 +659,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
             let internationals = team['Citizenship Status'].eq('FN')
     
             let numWomen = genders.eq('Woman').sum()
-            let numVets = vets.shape[0]
+            let numVets = vets.unique().shape[0]
             let numDiffIndustries = industries.unique().shape[0]
             let medianAge = age.median()
             let numInternationals = internationals.sum()
@@ -772,7 +772,7 @@ function ProcessData({ inputData, numTeams, rankings, updateTeams, jumpTo, catch
 
         if (!afterRender) return;
         // here DOM is loaded and you can query DOM elements
-        findBestTeams(emba, 10000)
+        findBestTeams(emba, 15000)
         setAfterRender(false)
     }, [afterRender])
      
