@@ -26,9 +26,35 @@
   border: #C4820E;
 }
 
+.card {
+  background: #fff;
+  padding: 0.25em;
+  border-radius: 25px;
+  border: 5px solid white;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.10) 0px 10px 20px,
+              rgba(0, 0, 0, 0.10) 0px 6px 6px;
+  transition: all .2s ease-in-out;
+}
+
 .cardIcon {
   text-align: center;
   font-size: 2rem;
+  color: #fff;
+  padding: 1.5em 0em;
+  border-radius: 10% 10% 100% 100% / 25% 25% 50% 50%;
+}
+
+.one {
+  background: #003262 ;
+}
+
+.two {
+  background: #C4820E ;
+}
+
+.three {
+  background: #003262 ;
 }
 
 /* Enable hover only on non-touch devices */

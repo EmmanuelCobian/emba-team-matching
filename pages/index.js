@@ -33,9 +33,9 @@ export default function Home() {
         <Container>
           <h2>Instructions</h2>
           <Row>
-            <Col md className='my-2'>
-              <Card>
-                <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-upload'></i></div>
+            <Col md={6} lg={4} className='my-2'>
+              <Card className={styles.card}>
+                <div className={classnames('mt-2', styles.cardIcon, styles.one)}><i className='bi bi-upload'></i></div>
                 <Card.Body className='text-center'>
                   <Card.Title>Upload Data</Card.Title>
                   <Card.Text>
@@ -44,9 +44,9 @@ export default function Home() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md className='my-2'>
-              <Card>
-                <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-ui-checks'></i></div>
+            <Col md={6} lg={4} className='my-2'>
+              <Card className={styles.card}>
+                <div className={classnames('mt-2', styles.cardIcon, styles.two)}><i className='bi bi-ui-checks'></i></div>
                 <Card.Body className='text-center'>
                   <Card.Title>Provide Details</Card.Title>
                   <Card.Text>
@@ -55,9 +55,9 @@ export default function Home() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md className='my-2'>
-              <Card>
-              <div className={classnames('mt-2', styles.cardIcon)}><i className='bi bi-hand-thumbs-up'></i></div>
+            <Col md={12} lg={4} className='my-2'>
+              <Card className={styles.card}>
+              <div className={classnames('mt-2', styles.cardIcon, styles.three)}><i className='bi bi-hand-thumbs-up'></i></div>
                 <Card.Body className='text-center'>
                   <Card.Title>Get Results</Card.Title>
                   <Card.Text>
