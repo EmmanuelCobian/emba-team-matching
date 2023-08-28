@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
+import Accordion from 'react-bootstrap/Accordion';
 import classnames from "classnames";
 import styles from "../styles/Home.module.css";
 import Layout from "../components/layout";
@@ -101,6 +102,38 @@ export default function Home() {
               </Card>
             </Col>
           </Row>
+        </Container>
+      </section>
+
+      <section id="faq" className="my-4">
+        <Container>
+          <h2>FAQ</h2>
+          <Accordion className="mt-3">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>How long does the process take to complete?</Accordion.Header>
+              <Accordion.Body>
+                Depending on the size of your data, this process could take anywhere from 4-10 minutes. Feel free to leave this window in the background while it's working.
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey="1">
+              <Accordion.Header>How does the algorithm work?</Accordion.Header>
+              <Accordion.Body>
+                This program uses an approximation algorithm that iteratively improves on itself over time. Because it would be unfeasible to go through all of the possible groups and chose the best one, this approach drastically cuts down on the amount of time while still ensuring great results.
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey="2">
+              <Accordion.Header>Is any of my data stored or linked to me?</Accordion.Header>
+              <Accordion.Body>
+                This program doesn't store or link any of your data. The results you get are also anonymous since running this program on the same data multiple times will always render a different result.
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey="3">
+              <Accordion.Header>What does my input file need to look like?</Accordion.Header>
+              <Accordion.Body>
+                Your csv file needs to be UTF-8 encoded and can contain any number and order of columns outside of the ones outlined in the <Link href="documentation">documentation</Link>.
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
         </Container>
       </section>
 
