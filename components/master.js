@@ -667,7 +667,7 @@ function ProcessData({
           // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
           // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
           // assign this person to the smallest team
-          if (minDupeTeamSize >= MAX_TEAM_SIZE) {
+          if (minDupeTeamSize > MAX_TEAM_SIZE) {
             teamIndex = argMin(teams.map((team) => team.shape[0]));
           } else {
             teamIndex = minDupeTeamIndex;
@@ -875,7 +875,7 @@ function ProcessData({
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 3000);
+    findBestTeams(emba, 1000);
     setAfterRender(false);
   }, [afterRender]);
 
@@ -895,7 +895,10 @@ function ProcessData({
       </style>
       <div className={classnames("text-center")}>
         <p>Compiling the teams...</p>
-        <p>Please take note that depending on the size of your data, this process may take anywhere from 4-10 minutes.</p>
+        <p>
+          Please take note that depending on the size of your data, this process
+          may take anywhere from 4-10 minutes.
+        </p>
         <ProgressBar
           animated
           variant="cal"
@@ -916,7 +919,11 @@ function DisplayResults({ inputData, jumpTo }) {
   return (
     <>
       <div className="text-center">
-        <p>Here are the results! <br/> Because of the nature of this process, you may not get satisfactory results on your first attempt. In that case, rerun this for better results.</p>
+        <p className="w-75 mx-auto">
+          Here are the results! <br /> Because of the nature of this process,
+          you may not get satisfactory results on your first attempt. In that
+          case, rerun this for better results.
+        </p>
         <Button
           className={classnames("mb-3", styles.btn)}
           onClick={() =>
