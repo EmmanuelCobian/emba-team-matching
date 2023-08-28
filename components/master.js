@@ -875,7 +875,7 @@ function ProcessData({
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 1000);
+    findBestTeams(emba, 12000);
     setAfterRender(false);
   }, [afterRender]);
 
