@@ -1,21 +1,23 @@
-import Link from 'next/link'
-import Container from 'react-bootstrap/Container'
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
-import styles from '../styles/Layout.module.css'
-
+import Link from "next/link";
+import Container from "react-bootstrap/Container";
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
+import styles from "../styles/Layout.module.css";
 
 export default function Layout({ children }) {
   return (
-    <>    
-      <Navbar expand='lg'>
+    <>
+      <Navbar expand="lg">
         <Container>
-          <Navbar.Brand >UC Berkeley Haas</Navbar.Brand>
-          <Navbar.Toggle aria-controls='basic-navbar-nav' />
-          <Navbar.Collapse id='basic-navbar-nav' className='justify-content-end'>
+          <Navbar.Brand>UC Berkeley Haas</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse
+            id="basic-navbar-nav"
+            className="justify-content-end"
+          >
             <Nav>
-              <Nav.Item >
-                <Link href='/' passHref legacyBehavior >
+              <Nav.Item>
+                <Link href="/" passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>Home</Nav.Link>
                 </Link>
               </Nav.Item>
@@ -30,12 +32,12 @@ export default function Layout({ children }) {
                 </Link>
               </Nav.Item> */}
               <Nav.Item>
-                <Link href='documentation' passHref legacyBehavior>
+                <Link href="documentation" passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>Documentation</Nav.Link>
                 </Link>
               </Nav.Item>
               <Nav.Item>
-                <Link href='/#get-started' passHref legacyBehavior>
+                <Link href="/#get-started" passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>Get Started</Nav.Link>
                 </Link>
               </Nav.Item>
@@ -53,5 +55,5 @@ export default function Layout({ children }) {
         </Container>
       </footer>
     </>
-  )
+  );
 }
