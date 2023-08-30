@@ -752,17 +752,12 @@ function ProcessData({
       if (team.count().values[0] == 0) {
         return 0;
       }
-      let genders = team["Gender"];
-      let vets = team["Military Status"].ne("");
-      let industries = team["Industry"];
-      let age = team["Age"];
-      let internationals = team["Citizenship Status"].eq("FN");
-
-      let numWomen = genders.eq("Woman").sum();
-      let numVets = vets.sum();
-      let numDiffIndustries = industries.unique().shape[0];
-      let medianAge = age.median();
-      let numInternationals = internationals.sum();
+      
+      let numWomen = team["Gender"].eq("Woman").sum();
+      let numVets = team["Military Status"].ne("").sum();
+      let numDiffIndustries = team["Industry"].unique().shape[0];
+      let medianAge = team["Age"].median();
+      let numInternationals = team["Citizenship Status"].eq("FN").sum();
 
       let score = 0;
       for (let i = 0; i < rankings.length; i++) {
@@ -844,7 +839,7 @@ function ProcessData({
       } catch (error) {
         return;
       }
-      console.log("max team size:", MAX_TEAM_SIZE);
+      // console.log("max team size:", MAX_TEAM_SIZE);
       let bestTeams = [];
       let bestScore = Infinity;
       let bestSeed = 0;
@@ -864,12 +859,12 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
-      console.log("final score:", bestScore);
-      console.log("best seed:", bestSeed);
-      console.log(
-        "rankings:",
-        rankings.map((rank) => rank.item)
-      );
+      // console.log("final score:", bestScore);
+      // console.log("best seed:", bestSeed);
+      // console.log(
+      //   "rankings:",
+      //   rankings.map((rank) => rank.item)
+      // );
       setTimeout(() => jumpTo("display"), 2000);
     }
 
