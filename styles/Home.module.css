@@ -1,7 +1,7 @@
 .home {
   background-image: 
-    /* linear-gradient(rgba(0, 0, 0, 0.5),
-    rgba(0, 0, 0, 0.5)), */
+    linear-gradient(rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.5)),
     url('../public/images/temp\ 3.jpg');
 
   background-repeat: no-repeat;
@@ -17,12 +17,12 @@
 }
 
 .mainText {
-  background-color: rgb(255, 255, 255, 0.75);
+  /* background-color: rgb(255, 255, 255, 0.75); */
   padding: 2em;
   max-width: 50%;
   margin-left: auto;
   margin-right: auto;
-  /* color: white; */
+  color: white;
 }
 
 .mainBtn {
