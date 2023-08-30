@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from 'next/image';
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
@@ -9,7 +10,7 @@ export default function Layout({ children }) {
     <>
       <Navbar expand="lg">
         <Container>
-          <Navbar.Brand>UC Berkeley Haas</Navbar.Brand>
+          <Navbar.Brand><Image src='/images/brand.png' width={150} height={50}/></Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse
             id="basic-navbar-nav"

@@ -752,7 +752,7 @@ function ProcessData({
       if (team.count().values[0] == 0) {
         return 0;
       }
-      
+
       let numWomen = team["Gender"].eq("Woman").sum();
       let numVets = team["Military Status"].ne("").sum();
       let numDiffIndustries = team["Industry"].unique().shape[0];
@@ -859,12 +859,12 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
-      // console.log("final score:", bestScore);
-      // console.log("best seed:", bestSeed);
-      // console.log(
-      //   "rankings:",
-      //   rankings.map((rank) => rank.item)
-      // );
+      console.log("final score:", bestScore);
+      console.log("best seed:", bestSeed);
+      console.log(
+        "rankings:",
+        rankings.map((rank) => rank.item)
+      );
       setTimeout(() => jumpTo("display"), 2000);
     }
 

@@ -17,12 +17,14 @@ export default function Home() {
 
       <section id="home" className={styles.home}>
         <Container className={styles.homeText}>
-          <h3>Team Matching Made Simple</h3>
-          <Button className={styles.mainBtn}>
-            <a href="#get-started" className="text-decoration-none text-white">
-              Get Started
-            </a>
-          </Button>
+          <div className={styles.mainText}>
+            <h3>Team Matching Made Simple</h3>
+            <Button className={styles.mainBtn}>
+              <a href="#get-started" className="text-decoration-none text-white">
+                Get Started
+              </a>
+            </Button>
+          </div>
         </Container>
       </section>
 

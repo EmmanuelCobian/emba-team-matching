@@ -1,14 +1,28 @@
 .home {
-  background-image: url('../public/images/Sather-tower-1920x1080-1.png');
+  background-image: 
+    /* linear-gradient(rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.5)), */
+    url('../public/images/temp\ 3.jpg');
+
   background-repeat: no-repeat;
   background-attachment: local;
   background-size: cover;
+  background-position: center;
 }
 
 .homeText {
   text-align: center;
   padding-top: 10rem;
   padding-bottom: 10rem;
+}
+
+.mainText {
+  background-color: rgb(255, 255, 255, 0.75);
+  padding: 2em;
+  max-width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  /* color: white; */
 }
 
 .mainBtn {
