@@ -9,7 +9,6 @@ import Tab from "react-bootstrap/Tab";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useCSVReader } from "react-papaparse";
 import classnames from "classnames";
-import BouncingDots from "@/components/dots";
 import styles from "../styles/Master.module.css";
 import * as dfd from "danfojs";
 
@@ -81,7 +80,11 @@ export default function Master() {
       case "error":
         return <ErrorCatch jumpTo={jumpTo} category={errMsg} />;
       default:
-        return <p>default content</p>;
+        return (
+          <p>
+            Something has gone wrong. Please refresh this page and try again.
+          </p>
+        );
     }
   }
 
@@ -149,6 +152,15 @@ function ErrorCatch({ jumpTo, category }) {
       <Row>
         <Col>
           <li>This column is forbidden from being used in your .csv file</li>
+        </Col>
+      </Row>
+    );
+  } else if (category == "Age") {
+    colName = "Age";
+    allowedTypes = (
+      <Row>
+        <Col>
+          <li>Any numerical value</li>
         </Col>
       </Row>
     );
@@ -728,6 +740,16 @@ function ProcessData({
       throw new Error("industry error");
     }
 
+    //validate age column
+    if (!data.columns.includes("Age")) {
+      catchError("error", "Age");
+      throw new Error("age error");
+    }
+    let colType = data["Age"].dtype;
+    if (colType == "string") {
+      catchError("error", "Age");
+      throw new Error("age error");
+    }
     // make sure there isn't a column called "Team"
     if (data.columns.includes("Team")) {
       catchError("error", "Team");
