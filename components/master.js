@@ -228,7 +228,7 @@ function FileUpload({ updateInputData, jumpTo }) {
                 {...getRootProps()}
                 className={classnames("mb-1", styles.btn)}
               >
-                Browse File
+                Upload File <i className="ms-1 bi bi-upload"></i>
               </Button>
               <div className={styles.acceptedFile}>
                 {acceptedFile && acceptedFile.name}
@@ -252,7 +252,15 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   ];
   const [finalRankings, setFinalRankings] = useState(rankings);
   const [numTeams, setNumTeams] = useState("");
-  const onInput = ({ target: { value } }) => setNumTeams(value);
+  const [groupSize, setGroupSize] = useState("");
+  const onNumTeamsInput = ({ target: { value } }) => {
+    setNumTeams(value);
+    setGroupSize(Math.ceil(dataLen / value));
+  };
+  const onGroupSizeInput = ({ target: { value } }) => {
+    setGroupSize(value);
+    setNumTeams(Math.ceil(dataLen / value));
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     setNumTeams();
@@ -290,7 +298,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
 
   return (
     <Form onSubmit={handleSubmit} className="mt-5">
-      <Form.Group className="w-75 mx-auto text-center">
+      <Form.Group className={styles.dnd}>
         <Form.Label>
           Drag and drop the rankings with highest priority at the top and lowest
           at the bottom
@@ -329,17 +337,36 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
           </Droppable>
         </DragDropContext>
       </Form.Group>
-      <Form.Group className="align-items-center d-flex flex-column">
-        <Form.Label>Number of Groups</Form.Label>
-        <Form.Control
-          required
-          type="number"
-          onChange={onInput}
-          value={numTeams}
-          min={1}
-          max={dataLen}
-          className={classnames("w-25", "mb-3")}
-        />
+      <Form.Group className={styles.dnd}>
+        <Row>
+          <Col sm={12} md={4} className="text-center">
+            <Form.Label>Number of Groups</Form.Label>
+            <Form.Control
+              required
+              type="number"
+              onChange={onNumTeamsInput}
+              value={numTeams}
+              min={1}
+              max={dataLen}
+              className={styles.teamSizeInput}
+            />
+          </Col>
+          <Col sm={12} md={4} className="text-center">
+            <p>- OR -</p>
+          </Col>
+          <Col sm={12} md={4} className="text-center">
+            <Form.Label>Group Size</Form.Label>
+            <Form.Control
+              required
+              type="number"
+              onChange={onGroupSizeInput}
+              value={groupSize}
+              min={1}
+              max={dataLen}
+              className={styles.teamSizeInput}
+            />
+          </Col>
+        </Row>
       </Form.Group>
       <Form.Group className="d-flex justify-content-center mb-4">
         <Button
@@ -892,7 +919,7 @@ function ProcessData({
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 12000);
+    findBestTeams(emba, 100);
     setAfterRender(false);
   }, [afterRender]);
 

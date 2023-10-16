@@ -5,6 +5,16 @@
     padding-bottom: 2rem;
 }
 
+.dnd {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.teamSizeInput {
+    max-width: 200px;
+    margin: 0 auto 2.5em auto;
+}
+
 .btn {
     background-color: #003262;
     border: #003262;
@@ -24,3 +34,9 @@
     /* background-color: green; */
     margin-bottom: 2rem;
 }
+
+@media (max-width: 768px) { 
+    .teamSizeInput {
+        margin: 0 auto 1em auto;
+    }
+ }

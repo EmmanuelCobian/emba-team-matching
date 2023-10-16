@@ -29,16 +29,6 @@ export default function Layout({ children }) {
                   <Nav.Link className={styles.navItem}>Home</Nav.Link>
                 </Link>
               </Nav.Item>
-              {/* <Nav.Item>
-                <Link href='/#about' passHref legacyBehavior>
-                  <Nav.Link className={styles.navItem}>About</Nav.Link>
-                </Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Link href='/#instructions' passHref legacyBehavior>
-                  <Nav.Link className={styles.navItem}>Instructions</Nav.Link>
-                </Link>
-              </Nav.Item> */}
               <Nav.Item>
                 <Link href="documentation" passHref legacyBehavior>
                   <Nav.Link className={styles.navItem}>Documentation</Nav.Link>

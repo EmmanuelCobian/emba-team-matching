@@ -31,7 +31,7 @@ export default function Home() {
         </Container>
       </section>
 
-      <section id="about" className="my-4">
+      <section id="about" className="my-5">
         <Container>
           <h2>About</h2>
           <p>
@@ -50,17 +50,19 @@ export default function Home() {
         </Container>
       </section>
 
-      <section id="instructions" className="my-4">
+      <section id="instructions" className="my-5">
         <Container>
           <h2>Instructions</h2>
           <Row>
             <Col md={6} lg={4} className="my-2">
               <Card className={styles.card}>
-                <div
-                  className={classnames("mt-2", styles.cardIcon, styles.one)}
-                >
-                  <i className="bi bi-upload"></i>
-                </div>
+                <a href="#get-started" className="text-white">
+                  <div
+                    className={classnames("mt-2", styles.cardIcon, styles.one)}
+                  >
+                    <i className="bi bi-upload"></i>
+                  </div>
+                </a>
                 <Card.Body className="text-center">
                   <Card.Title>Upload Data</Card.Title>
                   <Card.Text>
@@ -110,7 +112,14 @@ export default function Home() {
         </Container>
       </section>
 
-      <section id="faq" className="my-4">
+      <section id="get-started">
+        <Container>
+          <h2>Get Started</h2>
+          <Master />
+        </Container>
+      </section>
+
+      <section id="faq" className="mb-5">
         <Container>
           <h2>FAQ</h2>
           <Accordion className="mt-3">
@@ -163,13 +172,6 @@ export default function Home() {
               </Accordion.Body>
             </Accordion.Item>
           </Accordion>
-        </Container>
-      </section>
-
-      <section id="get-started">
-        <Container>
-          <h2>Get Started</h2>
-          <Master />
         </Container>
       </section>
     </Layout>
