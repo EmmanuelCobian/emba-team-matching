@@ -254,9 +254,13 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
 
   const handleCheckChange = (e) => {
     let rankTarget = e.target.id;
-    for (let i = 0; i < finalRankings.length; i++) {
-      let rank = finalRankings[i]
+    const items = Array.from(finalRankings)
+    for (let i = 0; i < items.length; i++) {
+      let rank = items[i]
       if (rank.item == rankTarget) {
+        rank.disabled = e.target.checked
+        items[i] = rank
+        setFinalRankings(items)
       }
     }
   }
@@ -280,7 +284,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
       margin: `0 0 8px 0`,
 
       // change background colour if dragging
-      background: (isDragging ? "#C4820E" : "#003262"),
+      background: isDragDisabled ? "#46535E" : (isDragging ? "#C4820E" : "#003262"),
       color: isDragging ? "#fff" : "#fff",
 
       // styles we need to apply on draggables
@@ -311,9 +315,9 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {finalRankings.map(({ item, icon, canDrag }, index) => {
+                {finalRankings.map(({ item, icon, disabled }, index) => {
                   return (
-                    <Draggable key={item} draggableId={item} index={index} isDragDisabled={canDrag}>
+                    <Draggable key={item} draggableId={item} index={index} isDragDisabled={disabled}>
                       {(provided, snapshot) => (
                         <ListGroup.Item
                           ref={provided.innerRef}
@@ -321,7 +325,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                           {...provided.draggableProps}
                           style={getItemStyle(
                             snapshot.isDragging,
-                            false,
+                            disabled,
                             provided.draggableProps.style
                           )}
                         >
