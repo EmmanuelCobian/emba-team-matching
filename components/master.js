@@ -30,23 +30,11 @@ export default function Master() {
     });
   };
 
-  const updateTeams = (teams) => {
-    setTeams(teams);
-  };
-
-  const updateNumTeams = (value) => {
-    setNumTeams(value);
-  };
-
-  const updateRankings = (ranks) => {
-    setRankings(ranks);
-  };
-
-  function jumpTo(nextStage) {
-    setStep(nextStage);
-  }
-
-  function catchError(nextStage, error) {
+  const updateTeams = (teams) => setTeams(teams);
+  const updateNumTeams = (value) => setNumTeams(value);
+  const updateRankings = (ranks) => setRankings(ranks);
+  const jumpTo = (nextStage) => setStep(nextStage);
+  const catchError = (nextStage, error) => {
     setStep(nextStage);
     setErrMsg(error);
   }
@@ -244,30 +232,34 @@ function FileUpload({ updateInputData, jumpTo }) {
 
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const rankings = [
-    { item: "Gender", icon: "bi bi-gender-ambiguous" },
-    { item: "Military", icon: "bi bi-wrench" },
-    { item: "Citizenship Status", icon: "bi bi-globe-americas" },
-    { item: "Industry", icon: "bi bi-briefcase" },
-    { item: "Age", icon: "bi bi-universal-access" },
+    { item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
+    { item: "Military", icon: "bi bi-wrench", disabled: false },
+    { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false },
+    { item: "Industry", icon: "bi bi-briefcase", disabled: false },
+    { item: "Age", icon: "bi bi-universal-access", disabled: false },
   ];
   const [finalRankings, setFinalRankings] = useState(rankings);
   const [numTeams, setNumTeams] = useState("");
   const [groupSize, setGroupSize] = useState("");
+
   const onNumTeamsInput = ({ target: { value } }) => {
     setNumTeams(value);
     setGroupSize(Math.ceil(dataLen / value));
   };
+
   const onGroupSizeInput = ({ target: { value } }) => {
     setGroupSize(value);
     setNumTeams(Math.ceil(dataLen / value));
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setNumTeams();
-    updateRankings(finalRankings);
-    updateNumTeams(parseInt(numTeams));
-    jumpTo("process");
-  };
+
+  const handleCheckChange = (e) => {
+    let rankTarget = e.target.id;
+    for (let i = 0; i < finalRankings.length; i++) {
+      let rank = finalRankings[i]
+      if (rank.item == rankTarget) {
+      }
+    }
+  }
 
   function handleOnDragEnd(result) {
     if (!result.destination) {
@@ -280,7 +272,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     setFinalRankings(items);
   }
 
-  function getItemStyle(isDragging, draggableStyle) {
+  function getItemStyle(isDragging, isDragDisabled, draggableStyle) {
     return {
       // some basic styles to make the items look a bit nicer
       userSelect: "none",
@@ -288,13 +280,21 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
       margin: `0 0 8px 0`,
 
       // change background colour if dragging
-      background: isDragging ? "#C4820E" : "#003262",
+      background: (isDragging ? "#C4820E" : "#003262"),
       color: isDragging ? "#fff" : "#fff",
 
       // styles we need to apply on draggables
       ...draggableStyle,
     };
   }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setNumTeams();
+    updateRankings(finalRankings);
+    updateNumTeams(parseInt(numTeams));
+    jumpTo("process");
+  };
 
   return (
     <Form onSubmit={handleSubmit} className="mt-5">
@@ -311,9 +311,9 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {finalRankings.map(({ item, icon }, index) => {
+                {finalRankings.map(({ item, icon, canDrag }, index) => {
                   return (
-                    <Draggable key={item} draggableId={item} index={index}>
+                    <Draggable key={item} draggableId={item} index={index} isDragDisabled={canDrag}>
                       {(provided, snapshot) => (
                         <ListGroup.Item
                           ref={provided.innerRef}
@@ -321,11 +321,20 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                           {...provided.draggableProps}
                           style={getItemStyle(
                             snapshot.isDragging,
+                            false,
                             provided.draggableProps.style
                           )}
                         >
                           <i className={classnames(icon, "me-2")} />
                           {item}
+                          <Form.Check 
+                            onChange={handleCheckChange}
+                            inline
+                            reverse
+                            type="checkbox"
+                            id={item}
+                            className="float-end"
+                          />
                         </ListGroup.Item>
                       )}
                     </Draggable>

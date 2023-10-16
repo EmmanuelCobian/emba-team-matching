@@ -11,12 +11,14 @@ export default function Layout({ children }) {
       <Navbar expand="lg">
         <Container>
           <Navbar.Brand>
-            <Image
-              src="/images/brand.png"
-              alt="Hass MBA For Executives Brand"
-              width={150}
-              height={50}
-            />
+            <Link href="/">
+              <Image
+                src="/images/brand.png"
+                alt="Hass MBA For Executives Brand"
+                width={150}
+                height={50}
+              />
+            </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse
