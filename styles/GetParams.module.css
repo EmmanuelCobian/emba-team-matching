@@ -1,0 +1,31 @@
+.dnd {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.teamSizeInput {
+  max-width: 200px;
+  margin: 0 auto 2.5em auto;
+}
+
+.btn {
+  background-color: #003262;
+  border: #003262;
+}
+
+.btn:hover {
+  background-color: #c4820e;
+  border: #c4820e;
+}
+
+.btn:active:hover {
+  background-color: #c4820e;
+  border: #c4820e;
+}
+
+@media (max-width: 768px) {
+  .teamSizeInput {
+    margin: 0 auto 1em auto;
+  }
+}
