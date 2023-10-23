@@ -4,78 +4,90 @@ import Table from "react-bootstrap/Table";
 import styles from '@/styles/ErrorCatch.module.css';
 
 function ErrorCatch({ jumpTo, category }) {
-  let colName = "";
+  let colName = category;
   let allowedTypes = "";
-  if (category == "Gender") {
-    colName = "Gender";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Woman</li>
-        </Col>
-        <Col>
-          <li>Man</li>
-        </Col>
-      </Row>
-    );
-  } else if (category == "Military") {
-    colName = "Military Status";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Army</li>
-          <li>Air Force</li>
-          <li>Navy</li>
-        </Col>
-        <Col>
-          <li>Marine Corps</li>
-          <li>Empty cell</li>
-        </Col>
-      </Row>
-    );
-  } else if (category == "Citizenship") {
-    colName = "Citizenship Status";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>US</li>
-          <li>PR</li>
-        </Col>
-        <Col>
-          <li>FN</li>
-        </Col>
-      </Row>
-    );
-  } else if (category == "Industries") {
-    colName = "Industry";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Any non-numerical value</li>
-        </Col>
-        <Col>
-          <li>Empty cell</li>
-        </Col>
-      </Row>
-    );
-  } else if (category == "Team") {
-    colName = "Team";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>This column is forbidden from being used in your .csv file</li>
-        </Col>
-      </Row>
-    );
-  } else if (category == "Age") {
-    colName = "Age";
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Any numerical value</li>
-        </Col>
-      </Row>
-    );
+  switch (category) {
+    case "Gender":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Woman</li>
+          </Col>
+          <Col>
+            <li>Man</li>
+          </Col>
+        </Row>
+      );
+    case "Military Status":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Army</li>
+            <li>Air Force</li>
+            <li>Navy</li>
+          </Col>
+          <Col>
+            <li>Marine Corps</li>
+            <li>Empty cell</li>
+          </Col>
+        </Row>
+      );
+    case "Citizenship Status":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>US</li>
+            <li>PR</li>
+          </Col>
+          <Col>
+            <li>FN</li>
+          </Col>
+        </Row>
+      );
+    case "Industry":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+          <Col>
+            <li>Empty cell</li>
+          </Col>
+        </Row>
+      );
+    case "Age":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any numerical value</li>
+          </Col>
+        </Row>
+      );
+    case "Team":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>This column is forbidden from being used in your .csv file</li>
+          </Col>
+        </Row>
+      );
+    case "Time Zone":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Parameters are yet to be implemented for this column</li>
+          </Col>
+        </Row>
+      );
+    case "Degree Major":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Parameters are yet to be implemented for this column</li>
+          </Col>
+        </Row>
+      );
+
   }
   return (
     <div>

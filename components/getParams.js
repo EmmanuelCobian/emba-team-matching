@@ -9,7 +9,7 @@ import styles from "@/styles/GetParams.module.css";
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const rankings = [
     { item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-    { item: "Military", icon: "bi bi-wrench", disabled: false },
+    { item: "Military Status", icon: "bi bi-wrench", disabled: false },
     { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false },
     { item: "Industry", icon: "bi bi-briefcase", disabled: false },
     { item: "Time Zone", icon: "bi bi-clock", disabled: false},

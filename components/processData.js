@@ -350,53 +350,89 @@ function ProcessData({
     return { data: data, teams: teams };
   }
 
+  function assignTimeZones(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignDegreeMajors(data, teams) {
+    return { data: data, teams: teams }
+  }
+
   function dataValidation(data) {
     let uniqueValues;
     let allowedValues;
+    let ranks = rankings.map((elm) => elm.item)
 
     // validate gender column
-    if (!data.columns.includes("Gender")) {
-      catchError("error", "Gender");
-      throw new Error("gender error");
+    if (ranks.includes('Gender')) {
+      if (!data.columns.includes("Gender")) {
+        catchError("error", "Gender");
+        throw new Error("gender error");
+      }
+      uniqueValues = data["Gender"].unique();
+      allowedValues = ["Man", "Woman"];
+      checkValues(uniqueValues, allowedValues, "Gender");
     }
-    uniqueValues = data["Gender"].unique();
-    allowedValues = ["Man", "Woman"];
-    checkValues(uniqueValues, allowedValues, "Gender");
 
     // validate military column
-    if (!data.columns.includes("Military Status")) {
-      catchError("error", "Military");
-      throw new Error("military error");
+    if (ranks.includes('Military Status')) {
+      if (!data.columns.includes("Military Status")) {
+        catchError("error", "Military Status");
+        throw new Error("military error");
+      }
+      uniqueValues = data["Military Status"].unique();
+      allowedValues = ["Army", "Air Force", "Navy", "Marine Corps", ""];
+      checkValues(uniqueValues, allowedValues, "Military Status");
     }
-    uniqueValues = data["Military Status"].unique();
-    allowedValues = ["Army", "Air Force", "Navy", "Marine Corps", ""];
-    checkValues(uniqueValues, allowedValues, "Military");
 
     // validate internationals column
-    if (!data.columns.includes("Citizenship Status")) {
-      catchError("error", "Citizenship");
-      throw new Error("citizenship status error");
+    if (ranks.includes('Citizenship Status')) {
+      if (!data.columns.includes("Citizenship Status")) {
+        catchError("error", "Citizenship Status");
+        throw new Error("citizenship status error");
+      }
+      uniqueValues = data["Citizenship Status"].unique();
+      allowedValues = ["FN", "US", "PR"];
+      checkValues(uniqueValues, allowedValues, "Citizenship");
     }
-    uniqueValues = data["Citizenship Status"].unique();
-    allowedValues = ["FN", "US", "PR"];
-    checkValues(uniqueValues, allowedValues, "Citizenship");
 
     // validate industry column
-    if (!data.columns.includes("Industry")) {
-      catchError("error", "Industries");
-      throw new Error("industry error");
+    if (ranks.includes('Industry')) {
+      if (!data.columns.includes("Industry")) {
+        catchError("error", "Industry");
+        throw new Error("industry error");
+      }
     }
 
     //validate age column
-    if (!data.columns.includes("Age")) {
-      catchError("error", "Age");
-      throw new Error("age error");
+    if (ranks.includes('Age')) {
+      if (!data.columns.includes("Age")) {
+        catchError("error", "Age");
+        throw new Error("age error");
+      }
+      let colType = data["Age"].dtype;
+      if (colType == "string") {
+        catchError("error", "Age");
+        throw new Error("age error");
+      }
     }
-    let colType = data["Age"].dtype;
-    if (colType == "string") {
-      catchError("error", "Age");
-      throw new Error("age error");
+
+    // validate time zones column
+    if (ranks.includes('Time Zone')) {
+      if (!data.columns.includes("Time Zone")) {
+        catchError('error', 'Time Zone')
+        throw new Error('time zone error')
+      }
     }
+
+    // validate degree major column
+    if (ranks.includes("Degree Major")) {
+      if (!data.columns.includes("Degree Major")) {
+        catchError('error', 'Degree Major')
+        throw new Error('degree major error')
+      }
+    }
+
     // make sure there isn't a column called "Team"
     if (data.columns.includes("Team")) {
       catchError("error", "Team");
@@ -432,18 +468,23 @@ function ProcessData({
       for (let i = 0; i < rankings.length; i++) {
         let rank = rankings[i].item;
         let weight = weights[i];
-        if (rank == "Gender") {
-          score += numWomen * weight;
-        } else if (rank == "Military") {
-          score += numVets * weight;
-        } else if (rank == "Citizenship Status") {
-          score += numInternationals * weight;
-        } else if (rank == "Industry") {
-          score += numDiffIndustries * weight;
-        } else if (rank == "Age") {
-          score += medianAge * weight;
-        } else {
-          score += 0;
+        switch (rank) {
+          case "Gender":
+            score += numWomen * weight
+          case "Military Status":
+            score += numVets * weight
+          case "Citizenship Status":
+            score += numInternationals * weight 
+          case "Industry":
+            score += numDiffIndustries * weight
+          case "Age":
+            score += medianAge * weight
+          case "Time Zone":
+            score += 1
+          case "Degree Major":
+            score += 1
+          default:
+            score += 0
         }
       }
       return score;
@@ -487,16 +528,21 @@ function ProcessData({
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
         let rank = rankings[i].item;
-        if (rank == "Gender") {
-          ongoing = assignWomen(ongoing.data, ongoing.teams);
-        } else if (rank == "Military") {
-          ongoing = assignVets(ongoing.data, ongoing.teams);
-        } else if (rank == "Citizenship Status") {
-          ongoing = assignInternationals(ongoing.data, ongoing.teams);
-        } else if (rank == "Industry") {
-          ongoing = assignIndustries(ongoing.data, ongoing.teams);
-        } else {
-          ongoing = ongoing;
+        switch (rank) {
+          case "Gender":
+            ongoing = assignWomen(ongoing.data, ongoing.teams)
+          case "Military Status":
+            ongoing = assignVets(ongoing.data, ongoing.teams)
+          case "Citizen Status":
+            ongoing = assignInternationals(ongoing.data, ongoing.teams)
+          case "Industry":
+            ongoing = assignIndustries(ongoing.data, ongoing.teams)
+          case "Time Zone":
+            ongoing = assignTimeZones(ongoing.data, ongoing.teams)
+          case "Degree Major":
+            ongoing = assignDegreeMajors(ongoing.data, ongoing.teams)
+          default:
+            ongoing = ongoing
         }
       }
       return { teams: ongoing.teams, seed: seed };
@@ -528,18 +574,18 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
-      // console.log("final score:", bestScore);
-      // console.log("best seed:", bestSeed);
-      // console.log(
-      //   "rankings:",
-      //   rankings.map((rank) => rank.item)
-      // );
+      console.log("final score:", bestScore);
+      console.log("best seed:", bestSeed);
+      console.log(
+        "rankings:",
+        rankings.map((rank) => rank.item)
+      );
       setTimeout(() => jumpTo("display"), 2000);
     }
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 100);
+    findBestTeams(emba, 1);
     setAfterRender(false);
   }, [afterRender]);
 
