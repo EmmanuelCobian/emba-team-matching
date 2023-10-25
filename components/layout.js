@@ -51,7 +51,6 @@ export default function Layout({ children }) {
       <footer className={styles.footer}>
         <Container>
           <p>Project for UC Berkeley MBA for Executives Program</p>
-          <p>Made by Emmanuel Cobian Duarte</p>
         </Container>
       </footer>
     </>
