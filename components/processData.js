@@ -459,8 +459,9 @@ function ProcessData({
       }
 
       let numWomen = team["Gender"].eq("Woman").sum();
-      let numVets = team["Military Status"].ne("").sum();
-      let numDiffIndustries = team["Industry"].unique().shape[0];
+      let vetMask = team["Military Status"].ne("");
+      let numVets = (team['Military Status'].loc(vetMask)).nUnique();
+      let numDiffIndustries = team["Industry"].nUnique();
       let medianAge = team["Age"].median();
       let numInternationals = team["Citizenship Status"].eq("FN").sum();
 
@@ -471,20 +472,28 @@ function ProcessData({
         switch (rank) {
           case "Gender":
             score += numWomen * weight
+            break
           case "Military Status":
             score += numVets * weight
+            break
           case "Citizenship Status":
             score += numInternationals * weight 
+            break
           case "Industry":
             score += numDiffIndustries * weight
+            break
           case "Age":
             score += medianAge * weight
+            break
           case "Time Zone":
             score += 1
+            break
           case "Degree Major":
             score += 1
+            break
           default:
             score += 0
+            break
         }
       }
       return score;
@@ -522,7 +531,8 @@ function ProcessData({
       teams.fill(
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
-      // military army example: seed, 0.1172232770299626, teams, 7, rankings, default
+      // military army example: seed, 0.5463393663170244, teams, 7, rankings, default
+      // 0.029249478778411886
       let seed = Math.random();
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
@@ -585,7 +595,7 @@ function ProcessData({
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 1);
+    findBestTeams(emba, 12500);
     setAfterRender(false);
   }, [afterRender]);
 

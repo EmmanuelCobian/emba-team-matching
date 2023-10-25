@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Fade from 'react-bootstrap/Fade';
 import FileUpload from "@/components/fileUpload";
 import ErrorCatch from "@/components/errorCatch";
 import GetParams from "@/components/getParams";
@@ -32,22 +33,29 @@ export default function Master() {
     setErrMsg(error);
   };
 
-  function handleChange() {
-    switch (step) {
-      case "file":
-        return <FileUpload updateInputData={updateInputData} jumpTo={jumpTo} />;
-      case "params":
-        return (
-          <GetParams
-            dataLen={inputData.data.length}
-            updateNumTeams={updateNumTeams}
-            updateRankings={updateRankings}
-            jumpTo={jumpTo}
-          />
-        );
-      case "process":
-        return (
-          <ProcessData
+  return (
+  <div>
+    <Fade in={step == 'file'}>
+      {step == 'file' ? 
+      <div>
+         <FileUpload updateInputData={updateInputData} jumpTo={jumpTo}/>
+      </div> : <span></span>}
+    </Fade>
+    <Fade in={step == 'params'}>
+      {step == 'params' ?
+      <div>
+        <GetParams
+          dataLen={inputData.data.length}
+          updateNumTeams={updateNumTeams}
+          updateRankings={updateRankings}
+          jumpTo={jumpTo}
+        />
+      </div> : <span></span>}
+    </Fade>
+    <Fade in={step == 'process'}>
+      {step == 'process' ? 
+      <div>
+        <ProcessData
             inputData={inputData}
             numTeams={numTeams}
             rankings={rankings}
@@ -55,19 +63,19 @@ export default function Master() {
             jumpTo={jumpTo}
             catchError={catchError}
           />
-        );
-      case "display":
-        return <DisplayResults inputData={finalTeams} jumpTo={jumpTo} />;
-      case "error":
-        return <ErrorCatch jumpTo={jumpTo} category={errMsg} />;
-      default:
-        return (
-          <p>
-            Something has gone wrong. Please refresh this page and try again.
-          </p>
-        );
-    }
-  }
-
-  return <div>{handleChange()}</div>;
+      </div> : <span></span>}
+    </Fade>
+    <Fade in={step == 'display'}>
+      {step == 'display' ? 
+      <div>
+        <DisplayResults inputData={finalTeams} jumpTo={jumpTo} />
+      </div> : <span></span>}
+    </Fade>
+    <Fade in={step == 'error'}>
+      {step == 'error' ? 
+      <div>
+        <ErrorCatch jumpTo={jumpTo} category={errMsg} />
+      </div> : <span></span>}
+    </Fade>
+  </div>);
 }
