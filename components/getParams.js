@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Row, Col } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import classnames from "classnames";
 import styles from "@/styles/GetParams.module.css";
@@ -89,13 +91,24 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     jumpTo("process");
   };
 
+  const Link = ({ id, children }) => (
+    <OverlayTrigger overlay={<Tooltip id={id}><img src="images/checkbox.jpg"/></Tooltip>}>
+      <span className="text-primary text-decoration-underline">
+        {children}
+      </span>
+    </OverlayTrigger>
+  )
+
   return (
     <Form onSubmit={handleSubmit} className="mt-5">
       <Form.Group className={styles.dnd}>
         <Form.Label>
           Drag and drop the rankings with highest priority at the top and lowest
           at the bottom. <br />
-          Select the checkbox for any category that you don't wish to include
+          Select the {' '}
+          <Link id="t-1">
+           checkbox
+          </Link> to the right of each row for any category that you don't wish to include
           in the matching process.
         </Form.Label>
         <DragDropContext onDragEnd={handleOnDragEnd}>
