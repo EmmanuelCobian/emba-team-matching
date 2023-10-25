@@ -112,14 +112,14 @@ export default function Home() {
         </Container>
       </section>
 
-      <section id="get-started">
+      <section id="get-started" className="my-5">
         <Container>
           <h2>Get Started</h2>
           <Master />
         </Container>
       </section>
 
-      <section id="faq" className="mb-5">
+      <section id="faq" className="my-5">
         <Container>
           <h2>FAQ</h2>
           <Accordion className="mt-3">
