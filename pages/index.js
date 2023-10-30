@@ -125,7 +125,7 @@ export default function Home() {
           <Accordion className="mt-3">
             <Accordion.Item eventKey="0">
               <Accordion.Header>
-                <span className="fw-normal">
+                <span className="fw-medium ">
                   How long does the process take to complete?
                 </span>
               </Accordion.Header>
@@ -137,7 +137,7 @@ export default function Home() {
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>
-                <span className="fw-normal">How does the algorithm work?</span>
+                <span className="fw-medium ">How does the algorithm work?</span>
               </Accordion.Header>
               <Accordion.Body>
                 This program uses an approximation algorithm that iteratively
@@ -149,7 +149,7 @@ export default function Home() {
             </Accordion.Item>
             <Accordion.Item eventKey="2">
               <Accordion.Header>
-                <span className="fw-normal">
+                <span className="fw-medium ">
                   Is any of my data stored or linked to me?
                 </span>
               </Accordion.Header>
@@ -161,7 +161,7 @@ export default function Home() {
             </Accordion.Item>
             <Accordion.Item eventKey="3">
               <Accordion.Header>
-                <span className="fw-normal">
+                <span className="fw-medium ">
                   What does my input file need to look like?
                 </span>
               </Accordion.Header>

@@ -13,6 +13,7 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
+  const NUM_ITERATIONS = 1000;
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
   const [afterRender, setAfterRender] = useState(false);
@@ -351,20 +352,20 @@ function ProcessData({
   }
 
   function assignTimeZones(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function assignDegreeMajors(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function dataValidation(data) {
     let uniqueValues;
     let allowedValues;
-    let ranks = rankings.map((elm) => elm.item)
+    let ranks = rankings.map((elm) => elm.item);
 
     // validate gender column
-    if (ranks.includes('Gender')) {
+    if (ranks.includes("Gender")) {
       if (!data.columns.includes("Gender")) {
         catchError("error", "Gender");
         throw new Error("gender error");
@@ -375,7 +376,7 @@ function ProcessData({
     }
 
     // validate military column
-    if (ranks.includes('Military Status')) {
+    if (ranks.includes("Military Status")) {
       if (!data.columns.includes("Military Status")) {
         catchError("error", "Military Status");
         throw new Error("military error");
@@ -386,7 +387,7 @@ function ProcessData({
     }
 
     // validate internationals column
-    if (ranks.includes('Citizenship Status')) {
+    if (ranks.includes("Citizenship Status")) {
       if (!data.columns.includes("Citizenship Status")) {
         catchError("error", "Citizenship Status");
         throw new Error("citizenship status error");
@@ -397,7 +398,7 @@ function ProcessData({
     }
 
     // validate industry column
-    if (ranks.includes('Industry')) {
+    if (ranks.includes("Industry")) {
       if (!data.columns.includes("Industry")) {
         catchError("error", "Industry");
         throw new Error("industry error");
@@ -405,7 +406,7 @@ function ProcessData({
     }
 
     //validate age column
-    if (ranks.includes('Age')) {
+    if (ranks.includes("Age")) {
       if (!data.columns.includes("Age")) {
         catchError("error", "Age");
         throw new Error("age error");
@@ -418,18 +419,18 @@ function ProcessData({
     }
 
     // validate time zones column
-    if (ranks.includes('Time Zone')) {
+    if (ranks.includes("Time Zone")) {
       if (!data.columns.includes("Time Zone")) {
-        catchError('error', 'Time Zone')
-        throw new Error('time zone error')
+        catchError("error", "Time Zone");
+        throw new Error("time zone error");
       }
     }
 
     // validate degree major column
     if (ranks.includes("Degree Major")) {
       if (!data.columns.includes("Degree Major")) {
-        catchError('error', 'Degree Major')
-        throw new Error('degree major error')
+        catchError("error", "Degree Major");
+        throw new Error("degree major error");
       }
     }
 
@@ -460,7 +461,7 @@ function ProcessData({
 
       let numWomen = team["Gender"].eq("Woman").sum();
       let vetMask = team["Military Status"].ne("");
-      let numVets = (team['Military Status'].loc(vetMask)).nUnique();
+      let numVets = team["Military Status"].loc(vetMask).nUnique();
       let numDiffIndustries = team["Industry"].nUnique();
       let medianAge = team["Age"].median();
       let numInternationals = team["Citizenship Status"].eq("FN").sum();
@@ -471,29 +472,29 @@ function ProcessData({
         let weight = weights[i];
         switch (rank) {
           case "Gender":
-            score += numWomen * weight
-            break
+            score += numWomen * weight;
+            break;
           case "Military Status":
-            score += numVets * weight
-            break
+            score += numVets * weight;
+            break;
           case "Citizenship Status":
-            score += numInternationals * weight 
-            break
+            score += numInternationals * weight;
+            break;
           case "Industry":
-            score += numDiffIndustries * weight
-            break
+            score += numDiffIndustries * weight;
+            break;
           case "Age":
-            score += medianAge * weight
-            break
+            score += medianAge * weight;
+            break;
           case "Time Zone":
-            score += 1
-            break
+            score += 1;
+            break;
           case "Degree Major":
-            score += 1
-            break
+            score += 1;
+            break;
           default:
-            score += 0
-            break
+            score += 0;
+            break;
         }
       }
       return score;
@@ -540,19 +541,19 @@ function ProcessData({
         let rank = rankings[i].item;
         switch (rank) {
           case "Gender":
-            ongoing = assignWomen(ongoing.data, ongoing.teams)
+            ongoing = assignWomen(ongoing.data, ongoing.teams);
           case "Military Status":
-            ongoing = assignVets(ongoing.data, ongoing.teams)
+            ongoing = assignVets(ongoing.data, ongoing.teams);
           case "Citizen Status":
-            ongoing = assignInternationals(ongoing.data, ongoing.teams)
+            ongoing = assignInternationals(ongoing.data, ongoing.teams);
           case "Industry":
-            ongoing = assignIndustries(ongoing.data, ongoing.teams)
+            ongoing = assignIndustries(ongoing.data, ongoing.teams);
           case "Time Zone":
-            ongoing = assignTimeZones(ongoing.data, ongoing.teams)
+            ongoing = assignTimeZones(ongoing.data, ongoing.teams);
           case "Degree Major":
-            ongoing = assignDegreeMajors(ongoing.data, ongoing.teams)
+            ongoing = assignDegreeMajors(ongoing.data, ongoing.teams);
           default:
-            ongoing = ongoing
+            ongoing = ongoing;
         }
       }
       return { teams: ongoing.teams, seed: seed };
@@ -595,7 +596,8 @@ function ProcessData({
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    findBestTeams(emba, 12500);
+    // findBestTeams(emba, 12500);
+    findBestTeams(emba, NUM_ITERATIONS);
     setAfterRender(false);
   }, [afterRender]);
 
@@ -607,11 +609,11 @@ function ProcessData({
     <>
       <style type="text/css">
         {`
-              .bg-cal {
-                  background-color: #003262;
-                  color: white;
-              }
-              `}
+        .bg-cal {
+            background-color: #003262;
+            color: white;
+        }
+        `}
       </style>
       <div className={classnames("text-center")}>
         <p>Compiling the teams...</p>
