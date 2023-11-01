@@ -13,7 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 1000;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 1000;
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
   const [afterRender, setAfterRender] = useState(false);
@@ -461,7 +462,12 @@ function ProcessData({
 
       let numWomen = team["Gender"].eq("Woman").sum();
       let vetMask = team["Military Status"].ne("");
-      let numVets = team["Military Status"].loc(vetMask).nUnique();
+      let numUniqueVets = team["Military Status"].loc(vetMask).nUnique();
+      let numVets = team['Military Status'].loc(vetMask).shape[0];
+      // give a large penalty for having duplicate military branches on the team
+      if (numVets != numUniqueVets) {
+        numVets = -2 * numVets
+      }
       let numDiffIndustries = team["Industry"].nUnique();
       let medianAge = team["Age"].median();
       let numInternationals = team["Citizenship Status"].eq("FN").sum();
@@ -532,8 +538,6 @@ function ProcessData({
       teams.fill(
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
-      // military army example: seed, 0.5463393663170244, teams, 7, rankings, default
-      // 0.029249478778411886
       let seed = Math.random();
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
@@ -542,18 +546,25 @@ function ProcessData({
         switch (rank) {
           case "Gender":
             ongoing = assignWomen(ongoing.data, ongoing.teams);
+            break;
           case "Military Status":
             ongoing = assignVets(ongoing.data, ongoing.teams);
+            break;
           case "Citizen Status":
             ongoing = assignInternationals(ongoing.data, ongoing.teams);
+            break;
           case "Industry":
             ongoing = assignIndustries(ongoing.data, ongoing.teams);
+            break;
           case "Time Zone":
             ongoing = assignTimeZones(ongoing.data, ongoing.teams);
+            break;
           case "Degree Major":
             ongoing = assignDegreeMajors(ongoing.data, ongoing.teams);
+            break;
           default:
             ongoing = ongoing;
+            break;
         }
       }
       return { teams: ongoing.teams, seed: seed };

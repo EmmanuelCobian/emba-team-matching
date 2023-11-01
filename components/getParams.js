@@ -14,8 +14,8 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     { item: "Military Status", icon: "bi bi-wrench", disabled: false },
     { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false },
     { item: "Industry", icon: "bi bi-briefcase", disabled: false },
-    { item: "Time Zone", icon: "bi bi-clock", disabled: false},
-    { item: "Degree Major", icon: "bi bi-pencil", disabled: false},
+    // { item: "Time Zone", icon: "bi bi-clock", disabled: false},
+    // { item: "Degree Major", icon: "bi bi-pencil", disabled: false},
     { item: "Age", icon: "bi bi-universal-access", disabled: false },
   ];
   const [finalRankings, setFinalRankings] = useState(rankings);

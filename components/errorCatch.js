@@ -18,6 +18,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Military Status":
       allowedTypes = (
         <Row>
@@ -32,6 +33,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Citizenship Status":
       allowedTypes = (
         <Row>
@@ -44,6 +46,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Industry":
       allowedTypes = (
         <Row>
@@ -55,6 +58,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Age":
       allowedTypes = (
         <Row>
@@ -63,6 +67,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Team":
       allowedTypes = (
         <Row>
@@ -71,6 +76,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Time Zone":
       allowedTypes = (
         <Row>
@@ -79,6 +85,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
+      break;
     case "Degree Major":
       allowedTypes = (
         <Row>
@@ -87,7 +94,7 @@ function ErrorCatch({ jumpTo, category }) {
           </Col>
         </Row>
       );
-
+      break;
   }
   return (
     <div>
