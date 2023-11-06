@@ -1,24 +1,31 @@
 import React, { useState } from "react";
 import { Button, Row, Col } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
 import ListGroup from "react-bootstrap/ListGroup";
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import classnames from "classnames";
 import styles from "@/styles/GetParams.module.css";
 
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
-  const rankings = [
-    { item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-    { item: "Military Status", icon: "bi bi-wrench", disabled: false },
-    { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false },
-    { item: "Industry", icon: "bi bi-briefcase", disabled: false },
-    // { item: "Time Zone", icon: "bi bi-clock", disabled: false},
-    // { item: "Degree Major", icon: "bi bi-pencil", disabled: false},
-    { item: "Age", icon: "bi bi-universal-access", disabled: false },
-  ];
+  const rankings = 
+    {
+      "emba": [{ item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
+      { item: "Military Status", icon: "bi bi-wrench", disabled: false },
+      { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
+      { item: "Industry", icon: "bi bi-briefcase", disabled: false },
+      { item: "Age", icon: "bi bi-universal-access", disabled: false },],
+      
+      "ft": [{ item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
+      { item: "Military Status", icon: "bi bi-wrench", disabled: false },
+      { item: "PQT", icon: "bi bi-briefcase", disabled: false },
+      { item: "UR", icon: "bi bi-people", disabled: false },],
+    }
   const [finalRankings, setFinalRankings] = useState(rankings);
+  const [selectedGroup, setSelectedGroup] = useState("emba");
   const [numTeams, setNumTeams] = useState("");
   const [groupSize, setGroupSize] = useState("");
 
@@ -34,7 +41,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
 
   const handleCheckChange = (e) => {
     let rankTarget = e.target.id;
-    const items = Array.from(finalRankings);
+    let items = Array.from(finalRankings[selectedGroup]);
     for (let i = 0; i < items.length; i++) {
       let rank = items[i];
       if (rank.item == rankTarget) {
@@ -45,7 +52,10 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         } else {
           items[i] = rank;
         }
-        setFinalRankings(items);
+        setFinalRankings((prevState => ({
+          ...prevState,
+          [selectedGroup]: items,
+        })));
       }
     }
   };
@@ -54,11 +64,14 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     if (!result.destination) {
       return;
     }
-    const items = Array.from(finalRankings);
+    const items = Array.from(finalRankings[selectedGroup]);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setFinalRankings(items);
+    setFinalRankings((prevState => ({
+      ...prevState,
+      [selectedGroup]: items,
+    })));
   }
 
   function getItemStyle(isDragging, isDragDisabled, draggableStyle) {
@@ -84,20 +97,23 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setNumTeams();
-    let res = finalRankings.filter((rank) => !rank.disabled);
+    let res = finalRankings[selectedGroup].filter((rank) => !rank.disabled);
     updateRankings(res);
     updateNumTeams(parseInt(numTeams));
     jumpTo("process");
   };
 
   const Link = ({ id, children }) => (
-    <OverlayTrigger overlay={<Tooltip id={id}><img src="images/checkbox.jpg"/></Tooltip>}>
-      <span className="text-primary text-decoration-underline">
-        {children}
-      </span>
+    <OverlayTrigger
+      overlay={
+        <Tooltip id={id}>
+          <img src="images/checkbox.jpg" />
+        </Tooltip>
+      }
+    >
+      <span className="text-primary text-decoration-underline">{children}</span>
     </OverlayTrigger>
-  )
+  );
 
   return (
     <Form onSubmit={handleSubmit} className="mt-5">
@@ -105,13 +121,19 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         <Form.Label>
           Drag and drop the rankings with highest priority at the top and lowest
           at the bottom. <br />
-          Select the {' '}
-          <Link id="t-1">
-           checkbox
-          </Link> to the right of each row for any category that you don't wish to include
-          in the matching process.
+          Select the <Link id="t-1">checkbox</Link> to the right of each row for
+          any category that you don't wish to include in the matching process.
         </Form.Label>
-        <DragDropContext onDragEnd={handleOnDragEnd}>
+        <Tabs
+          defaultActiveKey="emba"
+          activeKey={selectedGroup}
+          onSelect={(k) => setSelectedGroup(k)}
+          id="tabs"
+          className="my-3"
+          fill
+        >
+          <Tab eventKey="emba" title="EMBA">
+          <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="rankings">
             {(provided) => (
               <ListGroup
@@ -119,7 +141,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {finalRankings.map(({ item, icon, disabled }, index) => {
+                {finalRankings['emba'].map(({ item, icon, disabled }, index) => {
                   return (
                     <Draggable
                       key={item}
@@ -158,6 +180,57 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
             )}
           </Droppable>
         </DragDropContext>
+          </Tab>
+          <Tab eventKey="ft" title="Full-time MBA">
+          <DragDropContext onDragEnd={handleOnDragEnd}>
+          <Droppable droppableId="rankings">
+            {(provided) => (
+              <ListGroup
+                className={classnames("rankings mb-4 w-100 text-start")}
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {finalRankings['ft'].map(({ item, icon, disabled }, index) => {
+                  return (
+                    <Draggable
+                      key={item}
+                      draggableId={item}
+                      index={index}
+                      isDragDisabled={disabled}
+                    >
+                      {(provided, snapshot) => (
+                        <ListGroup.Item
+                          ref={provided.innerRef}
+                          {...provided.dragHandleProps}
+                          {...provided.draggableProps}
+                          style={getItemStyle(
+                            snapshot.isDragging,
+                            disabled,
+                            provided.draggableProps.style
+                          )}
+                        >
+                          <i className={classnames(icon, "me-2")} />
+                          {item}
+                          <Form.Check
+                            onChange={handleCheckChange}
+                            inline
+                            reverse
+                            type="checkbox"
+                            id={item}
+                            className="float-end"
+                          />
+                        </ListGroup.Item>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </ListGroup>
+            )}
+          </Droppable>
+        </DragDropContext>
+          </Tab>
+        </Tabs>
       </Form.Group>
       <Form.Group className={styles.dnd}>
         <Form.Label>Input a number in either field</Form.Label>
