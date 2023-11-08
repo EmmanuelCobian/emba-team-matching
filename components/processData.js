@@ -73,54 +73,23 @@ function ProcessData({
     return arr.reduce((iMax, x, i, a) => (x < a[iMax] ? i : iMax), 0);
   }
 
-  function getNumVetsPerTeam(teams, vetOptions) {
-    let result = [];
+  function getNumLabelPerTeam(teams, colName, colValOptions) {
+    let result = []
     for (let i = 0; i < teams.length; i++) {
-      let vets = teams[i]["Military Status"].values;
-      let numVets = 0;
-      for (let j = 0; j < vets.length; j++) {
-        let vet = vets[j];
-        if (vetOptions.includes(vet)) {
-          numVets += 1;
+      let items = teams[i][colName].values
+      let numLabel = 0
+      for (let j = 0; j < items.length; j++) {
+        let item = items[j]
+        if (colValOptions.includes(item)) {
+          numLabel += 1
         }
       }
-      result.push(numVets);
+      result.push(numLabel)
     }
-    return result;
+    return result
   }
 
-  function getNumIntPerTeam(teams, internationalStatus) {
-    let result = [];
-    for (let i = 0; i < teams.length; i++) {
-      const citizenStatus = teams[i]["Citizenship Status"].values;
-      let numInt = 0;
-      for (let j = 0; j < citizenStatus.length; j++) {
-        let status = citizenStatus[j];
-        if (status == internationalStatus) {
-          numInt += 1;
-        }
-      }
-      result.push(numInt);
-    }
-    return result;
-  }
-
-  function getNumWomenPerTeam(teams) {
-    let result = [];
-    for (let i = 0; i < teams.length; i++) {
-      const genders = teams[i]["Gender"].values;
-      let numWomen = 0;
-      for (let j = 0; j < genders.length; j++) {
-        let gender = genders[j];
-        if (gender == "Woman") {
-          numWomen += 1;
-        }
-      }
-      result.push(numWomen);
-    }
-    return result;
-  }
-
+  // TODO: generalize this function and make getNumLabelPerTeam a call of this function
   function getIndustriesPerTeam(teams) {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
@@ -146,7 +115,7 @@ function ProcessData({
 
     let teamIndex = 0;
     let minNumWomen = 2;
-    let numWomen = getNumWomenPerTeam(teams);
+    let numWomen = getNumLabelPerTeam(teams, "Gender", ["Woman"]);
     let numRows = data.shape[0];
     data = data.resetIndex();
 
@@ -212,7 +181,7 @@ function ProcessData({
           - if all teams have a vet, assign them to the team that has the least number of vets
           */
     const vetStatusOptions = ["Air Force", "Army", "Marine Corps", "Navy"];
-    let numVets = getNumVetsPerTeam(teams, vetStatusOptions);
+    let numVets = getNumLabelPerTeam(teams, "Military Status", vetStatusOptions);
     let minVetNum = 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -266,7 +235,7 @@ function ProcessData({
           - this can or cannot assign the remaining people. Depending on the number of international students left
           */
     const internationalStatus = "FN";
-    let numInternationals = getNumIntPerTeam(teams, internationalStatus);
+    let numInternationals = getNumLabelPerTeam(teams, "Citizenship Status", [internationalStatus]);
     let minInternationals = 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -380,6 +349,47 @@ function ProcessData({
   }
 
   function assignPQT(data, teams) {
+    const distributeLabel = "T";
+    let numDistLabel = getNumLabelPerTeam(teams, "PQT", [distributeLabel]);
+    let minPQT = 1;
+    let teamIndex = 0;
+    let numRows = data.shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      let citizenStatus = row["PQT"].iat(0);
+      if (citizenStatus != distributeLabel) {
+        continue;
+      }
+
+      let startIndex = teamIndex;
+      while (
+        numDistLabel[teamIndex] >= minPQT ||
+        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
+          teams[teamIndex].count().values[0] > 0)
+      ) {
+        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
+        if (startIndex == teamIndex) {
+          let minFN = Infinity;
+          for (let j = 0; j < teams.length; j++) {
+            if (
+              numDistLabel[j] < minFN &&
+              teams[j].shape[0] < MAX_TEAM_SIZE
+            ) {
+              minFN = numDistLabel[j];
+              teamIndex = j;
+            }
+          }
+          minPQT += 1;
+          break;
+        }
+      }
+      numDistLabel[teamIndex] += 1;
+      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+      data = data.drop({ index: [i] });
+    }
+
     return { data: data, teams: teams }
   }
 
@@ -576,8 +586,8 @@ function ProcessData({
             score += numVets * weight;
             break;
           case "PQT":
-            let minLabel = findMinLabel("PQT", emba["PQT"].unique().values);
-            let numMinLabel = team["PQT"].eq(minLabel).sum();
+            // let minLabel = findMinLabel("PQT", emba["PQT"].unique().values);
+            let numMinLabel = team["PQT"].eq("T").sum();
             score += numMinLabel * weight;
             break;
           case "UR":
