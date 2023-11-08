@@ -13,8 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 1000;
+  // const NUM_ITERATIONS = 12500;
+  const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -379,6 +379,30 @@ function ProcessData({
     return { data: data, teams: teams };
   }
 
+  function assignPQT(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignUR(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignEthnicity(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignEmployer(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignUGSchoolName(data, teams) {
+    return { data: data, teams: teams }
+  }
+
+  function assignUGSchoolMajor(data, teams) {
+    return { data: data, teams: teams }
+  }
+
   function dataValidation(data) {
     let uniqueValues;
     let allowedValues;
@@ -640,6 +664,24 @@ function ProcessData({
           case "Gender":
             ongoing = assignWomen(ongoing.data, ongoing.teams);
             break;
+          case "PQT":
+            ongoing = assignPQT(ongoing.data, ongoing.teams)
+            break;
+          case "UR":
+            ongoing = assignUR(ongoing.data, ongoing.teams)
+            break;
+          case "Employer":
+            ongoing = assignEmployer(ongoing.data, ongoing.teams)
+            break;
+          case "UG School Name":
+            ongoing = assignUGSchoolName(ongoing.data, ongoing.teams)
+            break;
+          case "UG School Major":
+            ongoing = assignUGSchoolMajor(ongoing.data, ongoing.teams)
+            break; 
+          case "Ethnicity":
+            ongoing = assignEthnicity(ongoing.data, ongoing.teams)
+            break;
           case "Military Status":
             ongoing = assignVets(ongoing.data, ongoing.teams);
             break;
@@ -718,7 +760,7 @@ function ProcessData({
         <p>Compiling the teams...</p>
         <p>
           Please take note that depending on the size of your data, this process
-          may take anywhere from 4-10 minutes.
+          may take anywhere from 5-20 minutes.
         </p>
         <ProgressBar
           animated
