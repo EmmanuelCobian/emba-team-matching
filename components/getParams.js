@@ -13,16 +13,26 @@ import styles from "@/styles/GetParams.module.css";
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const rankings = 
     {
-      "emba": [{ item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-      { item: "Military Status", icon: "bi bi-wrench", disabled: false },
-      { item: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
-      { item: "Industry", icon: "bi bi-briefcase", disabled: false },
-      { item: "Age", icon: "bi bi-universal-access", disabled: false },],
+      "emba": [
+      { displayValue: "Gender", colLabel: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
+      { displayValue: "Military Status", colLabel: "Military Status", icon: "bi bi-wrench", disabled: false },
+      { displayValue: "Citizenship Status", colLabel: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
+      { displayValue: "Industry", colLabel: "Industry", icon: "bi bi-graph-up", disabled: false },
+      { displayValue: "Age", colLabel: "Age", icon: "bi bi-universal-access", disabled: false },
+      ],
       
-      "ft": [{ item: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-      { item: "Military Status", icon: "bi bi-wrench", disabled: false },
-      { item: "PQT", icon: "bi bi-briefcase", disabled: false },
-      { item: "UR", icon: "bi bi-people", disabled: false },],
+      "ft": [
+      { displayValue: "PQT", colLabel: "PQT", icon: "bi bi-briefcase", disabled: false },
+      { displayValue: "Gender", colLabel: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
+      { displayValue: "Military Status", colLabel: "Military Status", icon: "bi bi-wrench", disabled: false },
+      { displayValue: "Underrepresented", colLabel: "UR", icon: "bi bi-people", disabled: false },
+      { displayValue: "Citizenship Status", colLabel: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
+      { displayValue: "Ethnicity", colLabel: "Ethnicity", icon: "bi bi-flag", disabled: false },
+      { displayValue: "Industry", colLabel: "Industry", icon: "bi bi-graph-up", disabled: false },
+      { displayValue: "Employer", colLabel: "Employer", icon: "bi bi-person-badge", disabled: false },
+      { displayValue: "School Name", colLabel: "UG School Name", icon: "bi bi-mortarboard", disabled: false },
+      { displayValue: "School Major", colLabel: "UG School Major", icon: "bi bi-laptop", disabled: false },
+      ],
     }
   const [finalRankings, setFinalRankings] = useState(rankings);
   const [selectedGroup, setSelectedGroup] = useState("emba");
@@ -44,7 +54,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     let items = Array.from(finalRankings[selectedGroup]);
     for (let i = 0; i < items.length; i++) {
       let rank = items[i];
-      if (rank.item == rankTarget) {
+      if (rank.displayValue == rankTarget) {
         rank.disabled = e.target.checked;
         if (e.target.checked) {
           items.splice(i, 1);
@@ -141,11 +151,11 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {finalRankings['emba'].map(({ item, icon, disabled }, index) => {
+                {finalRankings['emba'].map(({ displayValue, icon, disabled }, index) => {
                   return (
                     <Draggable
-                      key={item}
-                      draggableId={item}
+                      key={displayValue}
+                      draggableId={displayValue}
                       index={index}
                       isDragDisabled={disabled}
                     >
@@ -161,13 +171,13 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                           )}
                         >
                           <i className={classnames(icon, "me-2")} />
-                          {item}
+                          {displayValue}
                           <Form.Check
                             onChange={handleCheckChange}
                             inline
                             reverse
                             type="checkbox"
-                            id={item}
+                            id={displayValue}
                             className="float-end"
                           />
                         </ListGroup.Item>
@@ -190,11 +200,11 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {finalRankings['ft'].map(({ item, icon, disabled }, index) => {
+                {finalRankings['ft'].map(({ displayValue, icon, disabled }, index) => {
                   return (
                     <Draggable
-                      key={item}
-                      draggableId={item}
+                      key={displayValue}
+                      draggableId={displayValue}
                       index={index}
                       isDragDisabled={disabled}
                     >
@@ -210,13 +220,13 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
                           )}
                         >
                           <i className={classnames(icon, "me-2")} />
-                          {item}
+                          {displayValue}
                           <Form.Check
                             onChange={handleCheckChange}
                             inline
                             reverse
                             type="checkbox"
-                            id={item}
+                            id={displayValue}
                             className="float-end"
                           />
                         </ListGroup.Item>

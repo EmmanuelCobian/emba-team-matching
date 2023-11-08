@@ -13,11 +13,29 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 1000;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 1000;
+  const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
   const [afterRender, setAfterRender] = useState(false);
+
+  function generateWeights(n) {
+    let sequence = []
+    let num = 1
+    let sum = 0
+
+    for (let i = 0; i < n; i++) {
+      sequence.push(num)
+      sum += num
+      num /= 2
+    }
+    for (let i = 0; i < n; i++) {
+      sequence[i] /= sum
+    }
+
+    return sequence
+  }
 
   function handleAppend(data, row, teamNum) {
     let newData = { Team: [teamNum] };
@@ -36,10 +54,6 @@ function ProcessData({
       data.resetIndex({ inplace: true });
     }
     return data;
-  }
-
-  function argMax(arr) {
-    return arr.reduce((iMax, x, i, a) => (x > a[iMax] ? i : iMax), 0);
   }
 
   function argMin(arr) {
@@ -352,18 +366,10 @@ function ProcessData({
     return { data: data, teams: teams };
   }
 
-  function assignTimeZones(data, teams) {
-    return { data: data, teams: teams };
-  }
-
-  function assignDegreeMajors(data, teams) {
-    return { data: data, teams: teams };
-  }
-
   function dataValidation(data) {
     let uniqueValues;
     let allowedValues;
-    let ranks = rankings.map((elm) => elm.item);
+    let ranks = rankings.map((elm) => elm.colLabel);
 
     // validate gender column
     if (ranks.includes("Gender")) {
@@ -455,7 +461,7 @@ function ProcessData({
   }
 
   useEffect(() => {
-    function scoreOneTeam(team, weights) {
+    function scoreOneTeam(team) {
       if (team.count().values[0] == 0) {
         return 0;
       }
@@ -474,8 +480,8 @@ function ProcessData({
 
       let score = 0;
       for (let i = 0; i < rankings.length; i++) {
-        let rank = rankings[i].item;
-        let weight = weights[i];
+        let rank = rankings[i].colLabel;
+        let weight = WEIGHTS[i];
         switch (rank) {
           case "Gender":
             score += numWomen * weight;
@@ -492,12 +498,6 @@ function ProcessData({
           case "Age":
             score += medianAge * weight;
             break;
-          case "Time Zone":
-            score += 1;
-            break;
-          case "Degree Major":
-            score += 1;
-            break;
           default:
             score += 0;
             break;
@@ -509,9 +509,8 @@ function ProcessData({
     async function scoreIteration(teams) {
       // given one iteration, find a score and only keep the best one
       // the objective function is minimizing the difference in scores between teams
-      const weights = [0.4, 0.35, 0.15, 0.07, 0.03];
       let scores = [];
-      teams.map((team) => scores.push(scoreOneTeam(team, weights)));
+      teams.map((team) => scores.push(scoreOneTeam(team)));
       let allCombs = scores.map(function (item, i, arr) {
         var tmp = arr.map(function (_item) {
           if (item != _item) return [item, _item];
@@ -541,8 +540,9 @@ function ProcessData({
       let seed = Math.random();
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
+      // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
       for (let i = 0; i < rankings.length; i++) {
-        let rank = rankings[i].item;
+        let rank = rankings[i].colLabel;
         switch (rank) {
           case "Gender":
             ongoing = assignWomen(ongoing.data, ongoing.teams);
@@ -555,12 +555,6 @@ function ProcessData({
             break;
           case "Industry":
             ongoing = assignIndustries(ongoing.data, ongoing.teams);
-            break;
-          case "Time Zone":
-            ongoing = assignTimeZones(ongoing.data, ongoing.teams);
-            break;
-          case "Degree Major":
-            ongoing = assignDegreeMajors(ongoing.data, ongoing.teams);
             break;
           default:
             ongoing = ongoing;
@@ -596,18 +590,18 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
+      console.log('weights:', WEIGHTS);
       console.log("final score:", bestScore);
       console.log("best seed:", bestSeed);
       console.log(
         "rankings:",
-        rankings.map((rank) => rank.item)
+        rankings.map((rank) => rank.colLabel)
       );
       setTimeout(() => jumpTo("display"), 2000);
     }
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
-    // findBestTeams(emba, 12500);
     findBestTeams(emba, NUM_ITERATIONS);
     setAfterRender(false);
   }, [afterRender]);
