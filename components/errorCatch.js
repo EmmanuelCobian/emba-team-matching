@@ -19,6 +19,84 @@ function ErrorCatch({ jumpTo, category }) {
         </Row>
       );
       break;
+    case "PQT":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>P</li>
+            <li>Q</li>
+          </Col>
+          <Col>
+            <li>T</li>
+          </Col>
+        </Row>
+      );
+      break;
+    case "UR":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Underrepresented</li>
+          </Col>
+          <Col>
+            <li>Empty cell</li>
+          </Col>
+        </Row>
+      );
+      break;
+    case "Ethnicity":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
+    case "UG School Name":
+    allowedTypes = (
+      <Row>
+        <Col>
+          <li>Any non-numerical value</li>
+        </Col>
+      </Row>
+    );
+    break;
+    case "UG School Major":
+    allowedTypes = (
+      <Row>
+        <Col>
+          <li>Any non-numerical value</li>
+        </Col>
+      </Row>
+    );
+    break;
+    case "Employer":
+    allowedTypes = (
+      <Row>
+        <Col>
+          <li>Any non-numerical value</li>
+        </Col>
+      </Row>
+    );
+    break;
+    case "Continent":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>North America</li>
+            <li>South America</li>
+            <li>Europe</li>
+          </Col>
+          <Col>
+            <li>Asia</li>
+            <li>Africa</li>
+            <li>Australia</li>
+            <li>Antartica</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "Military Status":
       allowedTypes = (
         <Row>

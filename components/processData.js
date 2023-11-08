@@ -14,7 +14,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 500;
+  const NUM_ITERATIONS = 1;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -456,11 +456,11 @@ function ProcessData({
       }
       uniqueValues = data["Citizenship Status"].unique();
       allowedValues = ["FN", "US", "PR"];
-      checkValues(uniqueValues, allowedValues, "Citizenship");
+      checkValues(uniqueValues, allowedValues, "Citizenship Status");
 
       if (data.columns.includes("Continent")) {
         uniqueValues = data["Continent"].unique();
-        allowedValues = ["North America", "South America", "Europe", "Africa", "Asia", "Oceania", "Antartica"];
+        allowedValues = ["North America", "South America", "Europe", "Africa", "Asia", "Australia", "Antartica"];
         checkValues(uniqueValues, allowedValues, "Continent");
       }
     }
@@ -511,36 +511,35 @@ function ProcessData({
         return 0;
       }
 
-      let numWomen = team["Gender"].eq("Woman").sum();
-      let vetMask = team["Military Status"].ne("");
-      let numUniqueVets = team["Military Status"].loc(vetMask).nUnique();
-      let numVets = team['Military Status'].loc(vetMask).shape[0];
-      // give a large penalty for having duplicate military branches on the team
-      if (numVets != numUniqueVets) {
-        numVets = -2 * numVets
-      }
-      let numDiffIndustries = team["Industry"].nUnique();
-      let medianAge = team["Age"].median();
-      let numInternationals = team["Citizenship Status"].eq("FN").sum();
-
       let score = 0;
       for (let i = 0; i < rankings.length; i++) {
         let rank = rankings[i].colLabel;
         let weight = WEIGHTS[i];
         switch (rank) {
           case "Gender":
+            let numWomen = team["Gender"].eq("Woman").sum();
             score += numWomen * weight;
             break;
           case "Military Status":
+            let vetMask = team["Military Status"].ne("");
+            let numUniqueVets = team["Military Status"].loc(vetMask).nUnique();
+            let numVets = team['Military Status'].loc(vetMask).shape[0];
+            // give a large penalty for having duplicate military branches on the team
+            if (numVets != numUniqueVets) {
+              numVets = -2 * numVets
+            }
             score += numVets * weight;
             break;
           case "Citizenship Status":
+            let numInternationals = team["Citizenship Status"].eq("FN").sum();
             score += numInternationals * weight;
             break;
           case "Industry":
+            let numDiffIndustries = team["Industry"].nUnique();
             score += numDiffIndustries * weight;
             break;
           case "Age":
+            let medianAge = team["Age"].median();
             score += medianAge * weight;
             break;
           default:
@@ -585,7 +584,6 @@ function ProcessData({
       let seed = Math.random();
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
-      // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
       for (let i = 0; i < rankings.length; i++) {
         let rank = rankings[i].colLabel;
         switch (rank) {
@@ -606,6 +604,7 @@ function ProcessData({
             break;
         }
       }
+      // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
       return { teams: ongoing.teams, seed: seed };
     }
 
