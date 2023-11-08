@@ -90,10 +90,10 @@ function ProcessData({
   }
 
   // TODO: generalize this function and make getNumLabelPerTeam a call of this function
-  function getIndustriesPerTeam(teams) {
+  function getAggLabelPerTeam(teams, colName) {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
-      let industries = teams[i]["Industry"].values;
+      let industries = teams[i][colName].values;
       result.push(industries);
     }
 
@@ -286,7 +286,7 @@ function ProcessData({
           - this will assign any remaining people
           */
     let teamIndex = 0;
-    let teamIndustries = getIndustriesPerTeam(teams);
+    let teamIndustries = getAggLabelPerTeam(teams, "Industry");
     let numRows = data.shape[0];
     let teamSize = teams[teamIndex].shape[0];
     data = data.resetIndex();
