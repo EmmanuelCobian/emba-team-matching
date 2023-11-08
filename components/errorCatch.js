@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import { Button, Row, Col } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
-import styles from '@/styles/ErrorCatch.module.css';
+import styles from "@/styles/ErrorCatch.module.css";
 
 function ErrorCatch({ jumpTo, category }) {
   let colName = category;
@@ -54,32 +54,32 @@ function ErrorCatch({ jumpTo, category }) {
       );
       break;
     case "UG School Name":
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Any non-numerical value</li>
-        </Col>
-      </Row>
-    );
-    break;
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "UG School Major":
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Any non-numerical value</li>
-        </Col>
-      </Row>
-    );
-    break;
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "Employer":
-    allowedTypes = (
-      <Row>
-        <Col>
-          <li>Any non-numerical value</li>
-        </Col>
-      </Row>
-    );
-    break;
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "Continent":
       allowedTypes = (
         <Row>

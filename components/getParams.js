@@ -11,29 +11,103 @@ import classnames from "classnames";
 import styles from "@/styles/GetParams.module.css";
 
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
-  const rankings = 
-    {
-      "emba": [
-      { displayValue: "Gender", colLabel: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-      { displayValue: "Military Status", colLabel: "Military Status", icon: "bi bi-wrench", disabled: false },
-      { displayValue: "Citizenship Status", colLabel: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
-      { displayValue: "Industry", colLabel: "Industry", icon: "bi bi-graph-up", disabled: false },
-      { displayValue: "Age", colLabel: "Age", icon: "bi bi-universal-access", disabled: false },
-      ],
-      
-      "ft": [
-      { displayValue: "PQT", colLabel: "PQT", icon: "bi bi-briefcase", disabled: false },
-      { displayValue: "Gender", colLabel: "Gender", icon: "bi bi-gender-ambiguous", disabled: false },
-      { displayValue: "Military Status", colLabel: "Military Status", icon: "bi bi-wrench", disabled: false },
-      { displayValue: "Underrepresented", colLabel: "UR", icon: "bi bi-people", disabled: false },
-      { displayValue: "Citizenship Status", colLabel: "Citizenship Status", icon: "bi bi-globe-americas", disabled: false, },
-      { displayValue: "Ethnicity", colLabel: "Ethnicity", icon: "bi bi-flag", disabled: false },
-      { displayValue: "Industry", colLabel: "Industry", icon: "bi bi-graph-up", disabled: false },
-      { displayValue: "Employer", colLabel: "Employer", icon: "bi bi-person-badge", disabled: false },
-      { displayValue: "School Name", colLabel: "UG School Name", icon: "bi bi-mortarboard", disabled: false },
-      { displayValue: "School Major", colLabel: "UG School Major", icon: "bi bi-laptop", disabled: false },
-      ],
-    }
+  const rankings = {
+    emba: [
+      {
+        displayValue: "Gender",
+        colLabel: "Gender",
+        icon: "bi bi-gender-ambiguous",
+        disabled: false,
+      },
+      {
+        displayValue: "Military Status",
+        colLabel: "Military Status",
+        icon: "bi bi-wrench",
+        disabled: false,
+      },
+      {
+        displayValue: "Citizenship Status",
+        colLabel: "Citizenship Status",
+        icon: "bi bi-globe-americas",
+        disabled: false,
+      },
+      {
+        displayValue: "Industry",
+        colLabel: "Industry",
+        icon: "bi bi-graph-up",
+        disabled: false,
+      },
+      {
+        displayValue: "Age",
+        colLabel: "Age",
+        icon: "bi bi-universal-access",
+        disabled: false,
+      },
+    ],
+
+    ft: [
+      {
+        displayValue: "PQT",
+        colLabel: "PQT",
+        icon: "bi bi-briefcase",
+        disabled: false,
+      },
+      {
+        displayValue: "Gender",
+        colLabel: "Gender",
+        icon: "bi bi-gender-ambiguous",
+        disabled: false,
+      },
+      {
+        displayValue: "Military Status",
+        colLabel: "Military Status",
+        icon: "bi bi-wrench",
+        disabled: false,
+      },
+      {
+        displayValue: "Underrepresented",
+        colLabel: "UR",
+        icon: "bi bi-people",
+        disabled: false,
+      },
+      {
+        displayValue: "Citizenship Status",
+        colLabel: "Citizenship Status",
+        icon: "bi bi-globe-americas",
+        disabled: false,
+      },
+      {
+        displayValue: "Ethnicity",
+        colLabel: "Ethnicity",
+        icon: "bi bi-flag",
+        disabled: false,
+      },
+      {
+        displayValue: "Industry",
+        colLabel: "Industry",
+        icon: "bi bi-graph-up",
+        disabled: false,
+      },
+      {
+        displayValue: "Employer",
+        colLabel: "Employer",
+        icon: "bi bi-person-badge",
+        disabled: false,
+      },
+      {
+        displayValue: "School Name",
+        colLabel: "UG School Name",
+        icon: "bi bi-mortarboard",
+        disabled: false,
+      },
+      {
+        displayValue: "School Major",
+        colLabel: "UG School Major",
+        icon: "bi bi-laptop",
+        disabled: false,
+      },
+    ],
+  };
   const [finalRankings, setFinalRankings] = useState(rankings);
   const [selectedGroup, setSelectedGroup] = useState("emba");
   const [numTeams, setNumTeams] = useState("");
@@ -62,10 +136,10 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         } else {
           items[i] = rank;
         }
-        setFinalRankings((prevState => ({
+        setFinalRankings((prevState) => ({
           ...prevState,
           [selectedGroup]: items,
-        })));
+        }));
       }
     }
   };
@@ -78,10 +152,10 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setFinalRankings((prevState => ({
+    setFinalRankings((prevState) => ({
       ...prevState,
       [selectedGroup]: items,
-    })));
+    }));
   }
 
   function getItemStyle(isDragging, isDragDisabled, draggableStyle) {
@@ -143,102 +217,106 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
           fill
         >
           <Tab eventKey="emba" title="EMBA">
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="rankings">
-            {(provided) => (
-              <ListGroup
-                className={classnames("rankings mb-4 w-100 text-start")}
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {finalRankings['emba'].map(({ displayValue, icon, disabled }, index) => {
-                  return (
-                    <Draggable
-                      key={displayValue}
-                      draggableId={displayValue}
-                      index={index}
-                      isDragDisabled={disabled}
-                    >
-                      {(provided, snapshot) => (
-                        <ListGroup.Item
-                          ref={provided.innerRef}
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                          style={getItemStyle(
-                            snapshot.isDragging,
-                            disabled,
-                            provided.draggableProps.style
-                          )}
-                        >
-                          <i className={classnames(icon, "me-2")} />
-                          {displayValue}
-                          <Form.Check
-                            onChange={handleCheckChange}
-                            inline
-                            reverse
-                            type="checkbox"
-                            id={displayValue}
-                            className="float-end"
-                          />
-                        </ListGroup.Item>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </ListGroup>
-            )}
-          </Droppable>
-        </DragDropContext>
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <Droppable droppableId="rankings">
+                {(provided) => (
+                  <ListGroup
+                    className={classnames("rankings mb-4 w-100 text-start")}
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {finalRankings["emba"].map(
+                      ({ displayValue, icon, disabled }, index) => {
+                        return (
+                          <Draggable
+                            key={displayValue}
+                            draggableId={displayValue}
+                            index={index}
+                            isDragDisabled={disabled}
+                          >
+                            {(provided, snapshot) => (
+                              <ListGroup.Item
+                                ref={provided.innerRef}
+                                {...provided.dragHandleProps}
+                                {...provided.draggableProps}
+                                style={getItemStyle(
+                                  snapshot.isDragging,
+                                  disabled,
+                                  provided.draggableProps.style
+                                )}
+                              >
+                                <i className={classnames(icon, "me-2")} />
+                                {displayValue}
+                                <Form.Check
+                                  onChange={handleCheckChange}
+                                  inline
+                                  reverse
+                                  type="checkbox"
+                                  id={displayValue}
+                                  className="float-end"
+                                />
+                              </ListGroup.Item>
+                            )}
+                          </Draggable>
+                        );
+                      }
+                    )}
+                    {provided.placeholder}
+                  </ListGroup>
+                )}
+              </Droppable>
+            </DragDropContext>
           </Tab>
           <Tab eventKey="ft" title="Full-time MBA">
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="rankings">
-            {(provided) => (
-              <ListGroup
-                className={classnames("rankings mb-4 w-100 text-start")}
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {finalRankings['ft'].map(({ displayValue, icon, disabled }, index) => {
-                  return (
-                    <Draggable
-                      key={displayValue}
-                      draggableId={displayValue}
-                      index={index}
-                      isDragDisabled={disabled}
-                    >
-                      {(provided, snapshot) => (
-                        <ListGroup.Item
-                          ref={provided.innerRef}
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                          style={getItemStyle(
-                            snapshot.isDragging,
-                            disabled,
-                            provided.draggableProps.style
-                          )}
-                        >
-                          <i className={classnames(icon, "me-2")} />
-                          {displayValue}
-                          <Form.Check
-                            onChange={handleCheckChange}
-                            inline
-                            reverse
-                            type="checkbox"
-                            id={displayValue}
-                            className="float-end"
-                          />
-                        </ListGroup.Item>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </ListGroup>
-            )}
-          </Droppable>
-        </DragDropContext>
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <Droppable droppableId="rankings">
+                {(provided) => (
+                  <ListGroup
+                    className={classnames("rankings mb-4 w-100 text-start")}
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {finalRankings["ft"].map(
+                      ({ displayValue, icon, disabled }, index) => {
+                        return (
+                          <Draggable
+                            key={displayValue}
+                            draggableId={displayValue}
+                            index={index}
+                            isDragDisabled={disabled}
+                          >
+                            {(provided, snapshot) => (
+                              <ListGroup.Item
+                                ref={provided.innerRef}
+                                {...provided.dragHandleProps}
+                                {...provided.draggableProps}
+                                style={getItemStyle(
+                                  snapshot.isDragging,
+                                  disabled,
+                                  provided.draggableProps.style
+                                )}
+                              >
+                                <i className={classnames(icon, "me-2")} />
+                                {displayValue}
+                                <Form.Check
+                                  onChange={handleCheckChange}
+                                  inline
+                                  reverse
+                                  type="checkbox"
+                                  id={displayValue}
+                                  className="float-end"
+                                />
+                              </ListGroup.Item>
+                            )}
+                          </Draggable>
+                        );
+                      }
+                    )}
+                    {provided.placeholder}
+                  </ListGroup>
+                )}
+              </Droppable>
+            </DragDropContext>
           </Tab>
         </Tabs>
       </Form.Group>

@@ -21,20 +21,20 @@ function ProcessData({
   const [afterRender, setAfterRender] = useState(false);
 
   function generateWeights(n) {
-    let sequence = []
-    let num = 1
-    let sum = 0
+    let sequence = [];
+    let num = 1;
+    let sum = 0;
 
     for (let i = 0; i < n; i++) {
-      sequence.push(num)
-      sum += num
-      num /= 2
+      sequence.push(num);
+      sum += num;
+      num /= 2;
     }
     for (let i = 0; i < n; i++) {
-      sequence[i] /= sum
+      sequence[i] /= sum;
     }
 
-    return sequence
+    return sequence;
   }
 
   function handleAppend(data, row, teamNum) {
@@ -382,33 +382,33 @@ function ProcessData({
       checkValues(uniqueValues, allowedValues, "Gender");
     }
 
-    // validate PQT column 
+    // validate PQT column
     if (ranks.includes("PQT")) {
       if (!data.columns.includes("PQT")) {
         catchError("error", "PQT");
         throw new Error("pqt error");
       }
-      uniqueValues = data['PQT'].unique();
-      allowedValues = ['P', 'Q', 'T']
-      checkValues(uniqueValues, allowedValues, "PQT")
+      uniqueValues = data["PQT"].unique();
+      allowedValues = ["P", "Q", "T"];
+      checkValues(uniqueValues, allowedValues, "PQT");
     }
 
     // validate UR column
     if (ranks.includes("UR")) {
       if (!data.columns.includes("UR")) {
-        catchError("error", "UR")
-        throw new Error("underrepresented error")
+        catchError("error", "UR");
+        throw new Error("underrepresented error");
       }
-      uniqueValues = data['UR'].unique()
-      allowedValues = ['Underrepresented', '']
-      checkValues(uniqueValues, allowedValues, "UR")
+      uniqueValues = data["UR"].unique();
+      allowedValues = ["Underrepresented", ""];
+      checkValues(uniqueValues, allowedValues, "UR");
     }
 
     // validate Ethnicity column
     if (ranks.includes("Ethnicity")) {
       if (!data.columns.includes("Ethnicity")) {
-        catchError("error", "Ethnicity")
-        throw new Error("ethnicity error")
+        catchError("error", "Ethnicity");
+        throw new Error("ethnicity error");
       }
       // check for codes?
     }
@@ -416,24 +416,24 @@ function ProcessData({
     // validate UG School Name
     if (ranks.includes("UG School Name")) {
       if (!data.columns.includes("UG School Name")) {
-        catchError("error", "UG School Name")
-        throw new Error("ug school name error")
+        catchError("error", "UG School Name");
+        throw new Error("ug school name error");
       }
     }
 
     // validate UG School Major
     if (ranks.includes("UG School Major")) {
       if (!data.columns.includes("UG School Major")) {
-        catchError("error", "UG School Major")
-        throw new Error("ug school major error")
+        catchError("error", "UG School Major");
+        throw new Error("ug school major error");
       }
     }
 
     // validate employer column
     if (ranks.includes("Employer")) {
       if (!data.columns.includes("Employer")) {
-        catchError("error", "Employer")
-        throw new Error("employer error")
+        catchError("error", "Employer");
+        throw new Error("employer error");
       }
     }
 
@@ -460,7 +460,15 @@ function ProcessData({
 
       if (data.columns.includes("Continent")) {
         uniqueValues = data["Continent"].unique();
-        allowedValues = ["North America", "South America", "Europe", "Africa", "Asia", "Australia", "Antartica"];
+        allowedValues = [
+          "North America",
+          "South America",
+          "Europe",
+          "Africa",
+          "Asia",
+          "Australia",
+          "Antartica",
+        ];
         checkValues(uniqueValues, allowedValues, "Continent");
       }
     }
@@ -523,12 +531,18 @@ function ProcessData({
           case "Military Status":
             let vetMask = team["Military Status"].ne("");
             let numUniqueVets = team["Military Status"].loc(vetMask).nUnique();
-            let numVets = team['Military Status'].loc(vetMask).shape[0];
+            let numVets = team["Military Status"].loc(vetMask).shape[0];
             // give a large penalty for having duplicate military branches on the team
             if (numVets != numUniqueVets) {
-              numVets = -2 * numVets
+              numVets = -2 * numVets;
             }
             score += numVets * weight;
+            break;
+          case "PQT":
+            let numP = team["PQT"].eq("P").sum();
+            let numQ = team["PQT"].eq("Q").sum();
+            let numT = team["PQT"].eq("T").sum();
+            score += numP * weight;
             break;
           case "Citizenship Status":
             let numInternationals = team["Citizenship Status"].eq("FN").sum();
@@ -634,7 +648,7 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
-      console.log('weights:', WEIGHTS);
+      console.log("weights:", WEIGHTS);
       console.log("final score:", bestScore);
       console.log("best seed:", bestSeed);
       console.log(
