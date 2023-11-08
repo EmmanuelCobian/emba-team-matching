@@ -77,16 +77,7 @@ function ErrorCatch({ jumpTo, category }) {
         </Row>
       );
       break;
-    case "Time Zone":
-      allowedTypes = (
-        <Row>
-          <Col>
-            <li>Parameters are yet to be implemented for this column</li>
-          </Col>
-        </Row>
-      );
-      break;
-    case "Degree Major":
+    default:
       allowedTypes = (
         <Row>
           <Col>

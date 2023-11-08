@@ -13,8 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 1000;
+  // const NUM_ITERATIONS = 12500;
+  const NUM_ITERATIONS = 500;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -382,6 +382,61 @@ function ProcessData({
       checkValues(uniqueValues, allowedValues, "Gender");
     }
 
+    // validate PQT column 
+    if (ranks.includes("PQT")) {
+      if (!data.columns.includes("PQT")) {
+        catchError("error", "PQT");
+        throw new Error("pqt error");
+      }
+      uniqueValues = data['PQT'].unique();
+      allowedValues = ['P', 'Q', 'T']
+      checkValues(uniqueValues, allowedValues, "PQT")
+    }
+
+    // validate UR column
+    if (ranks.includes("UR")) {
+      if (!data.columns.includes("UR")) {
+        catchError("error", "UR")
+        throw new Error("underrepresented error")
+      }
+      uniqueValues = data['UR'].unique()
+      allowedValues = ['Underrepresented', '']
+      checkValues(uniqueValues, allowedValues, "UR")
+    }
+
+    // validate Ethnicity column
+    if (ranks.includes("Ethnicity")) {
+      if (!data.columns.includes("Ethnicity")) {
+        catchError("error", "Ethnicity")
+        throw new Error("ethnicity error")
+      }
+      // check for codes?
+    }
+
+    // validate UG School Name
+    if (ranks.includes("UG School Name")) {
+      if (!data.columns.includes("UG School Name")) {
+        catchError("error", "UG School Name")
+        throw new Error("ug school name error")
+      }
+    }
+
+    // validate UG School Major
+    if (ranks.includes("UG School Major")) {
+      if (!data.columns.includes("UG School Major")) {
+        catchError("error", "UG School Major")
+        throw new Error("ug school major error")
+      }
+    }
+
+    // validate employer column
+    if (ranks.includes("Employer")) {
+      if (!data.columns.includes("Employer")) {
+        catchError("error", "Employer")
+        throw new Error("employer error")
+      }
+    }
+
     // validate military column
     if (ranks.includes("Military Status")) {
       if (!data.columns.includes("Military Status")) {
@@ -402,6 +457,12 @@ function ProcessData({
       uniqueValues = data["Citizenship Status"].unique();
       allowedValues = ["FN", "US", "PR"];
       checkValues(uniqueValues, allowedValues, "Citizenship");
+
+      if (data.columns.includes("Continent")) {
+        uniqueValues = data["Continent"].unique();
+        allowedValues = ["North America", "South America", "Europe", "Africa", "Asia", "Oceania", "Antartica"];
+        checkValues(uniqueValues, allowedValues, "Continent");
+      }
     }
 
     // validate industry column
@@ -422,22 +483,6 @@ function ProcessData({
       if (colType == "string") {
         catchError("error", "Age");
         throw new Error("age error");
-      }
-    }
-
-    // validate time zones column
-    if (ranks.includes("Time Zone")) {
-      if (!data.columns.includes("Time Zone")) {
-        catchError("error", "Time Zone");
-        throw new Error("time zone error");
-      }
-    }
-
-    // validate degree major column
-    if (ranks.includes("Degree Major")) {
-      if (!data.columns.includes("Degree Major")) {
-        catchError("error", "Degree Major");
-        throw new Error("degree major error");
       }
     }
 
