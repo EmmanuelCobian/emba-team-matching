@@ -13,8 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 1;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -35,6 +35,19 @@ function ProcessData({
     }
 
     return sequence;
+  }
+
+  function findMinLabel(col, uniqueVals) {
+    let minLabel = uniqueVals[0];
+    let minSize = Infinity;
+    for (let i = 0; i < uniqueVals.length; i++) {
+      let size = emba[col].eq(uniqueVals[i]).sum();
+      if (size < minSize) {
+        minSize = size;
+        minLabel = uniqueVals[i];
+      }
+    }
+    return minLabel;
   }
 
   function handleAppend(data, row, teamNum) {
@@ -539,14 +552,37 @@ function ProcessData({
             score += numVets * weight;
             break;
           case "PQT":
-            let numP = team["PQT"].eq("P").sum();
-            let numQ = team["PQT"].eq("Q").sum();
-            let numT = team["PQT"].eq("T").sum();
-            score += numP * weight;
+            let minLabel = findMinLabel("PQT", emba["PQT"].unique().values);
+            let numMinLabel = team["PQT"].eq(minLabel).sum();
+            score += numMinLabel * weight;
+            break;
+          case "UR":
+            let numUR = team["UR"].eq("Underrepresented").sum();
+            score += numUR * weight;
+            break;
+          case "Ethnicity":
+            let numUniqueEth = team["Ethnicity"].nUnique();
+            score += numUniqueEth * weight;
+            break;
+          case "UG School Name":
+            let numUniqueSchool = team["UG School Name"].nUnique();
+            score += numUniqueSchool * weight;
+            break;
+          case "UG School Major":
+            let numUniqueMajor = team["UG School Major"].nUnique();
+            score += numUniqueMajor * weight;
+            break;
+          case "Employer":
+            let numDiffEmployers = team["Employer"].nUnique();
+            score += numDiffEmployers * weight;
             break;
           case "Citizenship Status":
             let numInternationals = team["Citizenship Status"].eq("FN").sum();
             score += numInternationals * weight;
+            break;
+          case "Continent":
+            let numUniqueCont = team['Continent'].nUnique()
+            score += numUniqueCont * weight
             break;
           case "Industry":
             let numDiffIndustries = team["Industry"].nUnique();
