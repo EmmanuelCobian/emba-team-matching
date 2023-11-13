@@ -89,7 +89,6 @@ function ProcessData({
     return result
   }
 
-  // TODO: generalize this function and make getNumLabelPerTeam a call of this function
   function getAggLabelPerTeam(teams, colName) {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
@@ -105,6 +104,17 @@ function ProcessData({
     let boolMask = teamSeries.eq(industry);
     return boolMask.sum();
   }
+
+  // distribute with min # labels per group
+    // min 2 women per team
+    // min 2 underrepresented per team
+    
+  // distribute min label evenly accross teams
+    // internationals
+    // vets?
+  
+  // distribute to fill remaining spots on teams
+    // industries
 
   function assignWomen(data, teams) {
     /* 
