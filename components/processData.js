@@ -13,8 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 1000;
+  const NUM_ITERATIONS = 10000;
+  // const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -236,53 +236,7 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
-  const distributeMinLabelAssign = (
-    data,
-    teams,
-    col,
-    allowedValues,
-  ) => {
-    const minLabel = findMinLabel(col, allowedValues);
-    let numLabel = getNumLabelPerTeam(teams, col, [minLabel]);
-    let minNumLabel = 1;
-    let teamIndex = 0;
-    let numRows = data.shape[0];
-    data = data.resetIndex();
-
-    for (let i = 0; i < numRows; i++) {
-      let row = data.loc({ rows: [i] });
-      if (row[col].iat(0) != minLabel) {
-        continue;
-      }
-
-      let startIndex = teamIndex;
-      while (
-        numLabel[teamIndex] >= minNumLabel ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        if (startIndex == teamIndex) {
-          let minFN = Infinity;
-          for (let j = 0; j < teams.length; j++) {
-            if (numLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
-              minFN = numLabel[j];
-              teamIndex = j;
-            }
-          }
-          minNumLabel += 1;
-          break;
-        }
-      }
-      numLabel[teamIndex] += 1;
-      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      data = data.drop({ index: [i] });
-    }
-
-    return { data: data, teams: teams };
-  };
-
-  const distributeMaxLabelAssign = (data, teams, col, allowedValues, containsEmpty, remainingValues) => {
+  const distributeMinLabelAssign = (data, teams, col, allowedValues, containsEmpty, remainingValues) => {
     if (containsEmpty && remainingValues.length == 0) {
       return { data: data, teams: teams };
     }
@@ -302,7 +256,7 @@ function ProcessData({
       let startIndex = teamIndex;
       while (
         numLabel[teamIndex] >= minNumLabel ||
-        (containsEmpty && numLabel[teamIndex][col].values.includes(minLabel)) ||
+        (containsEmpty && teams[teamIndex][col].values.includes(minLabel)) ||
         (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
         teams[teamIndex].count().values[0] > 0)
       ) {
@@ -685,7 +639,7 @@ function ProcessData({
             break;
           case "Military Status":
             allowedValues = ["Air Force", "Army", "Marine Corps", "Navy"]
-            ongoing = distributeMaxLabelAssign(
+            ongoing = distributeMinLabelAssign(
               ongoing.data,
               ongoing.teams,
               "Military Status",
@@ -700,7 +654,9 @@ function ProcessData({
               ongoing.data,
               ongoing.teams,
               "Citizenship Status",
-              allowedValues
+              allowedValues,
+              false,
+              []
             );
             break;
           case "PQT":
@@ -709,7 +665,9 @@ function ProcessData({
               ongoing.data,
               ongoing.teams,
               "PQT",
-              allowedValues
+              allowedValues,
+              false,
+              []
             );
             break;
           case "Industry":
