@@ -47,27 +47,9 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
 
     ft: [
       {
-        displayValue: "PQT",
-        colLabel: "PQT",
-        icon: "bi bi-briefcase",
-        disabled: false,
-      },
-      {
         displayValue: "Gender",
         colLabel: "Gender",
         icon: "bi bi-gender-ambiguous",
-        disabled: false,
-      },
-      {
-        displayValue: "Military Status",
-        colLabel: "Military Status",
-        icon: "bi bi-wrench",
-        disabled: false,
-      },
-      {
-        displayValue: "Underrepresented",
-        colLabel: "UR",
-        icon: "bi bi-people",
         disabled: false,
       },
       {
@@ -77,9 +59,21 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         disabled: false,
       },
       {
-        displayValue: "Ethnicity",
-        colLabel: "Ethnicity",
-        icon: "bi bi-flag",
+        displayValue: "PQT",
+        colLabel: "PQT",
+        icon: "bi bi-briefcase",
+        disabled: false,
+      },
+      {
+        displayValue: "Underrepresented",
+        colLabel: "UR",
+        icon: "bi bi-people",
+        disabled: false,
+      },
+      {
+        displayValue: "School Major",
+        colLabel: "UG School Major",
+        icon: "bi bi-laptop",
         disabled: false,
       },
       {
@@ -89,9 +83,9 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         disabled: false,
       },
       {
-        displayValue: "Employer",
-        colLabel: "Employer",
-        icon: "bi bi-person-badge",
+        displayValue: "Military Status",
+        colLabel: "Military Status",
+        icon: "bi bi-wrench",
         disabled: false,
       },
       {
@@ -101,9 +95,15 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         disabled: false,
       },
       {
-        displayValue: "School Major",
-        colLabel: "UG School Major",
-        icon: "bi bi-laptop",
+        displayValue: "Employer",
+        colLabel: "Employer",
+        icon: "bi bi-person-badge",
+        disabled: false,
+      },
+      {
+        displayValue: "Ethnicity",
+        colLabel: "Ethnicity",
+        icon: "bi bi-flag",
         disabled: false,
       },
     ],

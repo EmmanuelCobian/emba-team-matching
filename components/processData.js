@@ -13,7 +13,7 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 10000;
+  const NUM_ITERATIONS = 1;
   // const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
@@ -141,6 +141,7 @@ function ProcessData({
       data = data.drop({ index: [i] });
     }
 
+    // TODO: fix this to handle larger input sizes
     if (numLabel[teamIndex] == 1) {
       let lastPersonAdded = teams[teamIndex].iloc({
         rows: [teams[teamIndex].shape[0] - 1],
@@ -152,7 +153,7 @@ function ProcessData({
 
       let nWomenFilter = [];
       for (let i = 0; i < teams.length; i++) {
-        if (numLabel[i] <= 1) {
+        if (numLabel[i] >= minNum) {
           nWomenFilter.push(Infinity);
         } else {
           nWomenFilter.push(numLabel[i]);
@@ -341,22 +342,6 @@ function ProcessData({
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
     }
-    return { data: data, teams: teams };
-  }
-
-  function assignEthnicity(data, teams) {
-    return { data: data, teams: teams };
-  }
-
-  function assignEmployer(data, teams) {
-    return { data: data, teams: teams };
-  }
-
-  function assignUGSchoolName(data, teams) {
-    return { data: data, teams: teams };
-  }
-
-  function assignUGSchoolMajor(data, teams) {
     return { data: data, teams: teams };
   }
 
@@ -612,7 +597,8 @@ function ProcessData({
       teams.fill(
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
-      let seed = Math.random();
+      // let seed = Math.random();
+      let seed = 0.45079499374715326
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
@@ -649,7 +635,7 @@ function ProcessData({
             );
             break;
           case "Citizenship Status":
-            allowedValues = ["FN", "US", "PR"]
+            allowedValues = ["FN", "US"]
             ongoing = distributeMinLabelAssign(
               ongoing.data,
               ongoing.teams,
@@ -678,16 +664,32 @@ function ProcessData({
             );
             break;
           case "Employer":
-            ongoing = assignEmployer(ongoing.data, ongoing.teams);
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Employer"
+            );
             break;
           case "UG School Name":
-            ongoing = assignUGSchoolName(ongoing.data, ongoing.teams);
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "UG School Name"
+            );
             break;
           case "UG School Major":
-            ongoing = assignUGSchoolMajor(ongoing.data, ongoing.teams);
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "UG School Major"
+            );
             break;
           case "Ethnicity":
-            ongoing = assignEthnicity(ongoing.data, ongoing.teams);
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Ethnicity"
+            );
             break;
           default:
             ongoing = ongoing;
@@ -704,7 +706,6 @@ function ProcessData({
       } catch (error) {
         return;
       }
-      // console.log("max team size:", MAX_TEAM_SIZE);
       let bestTeams = [];
       let bestScore = Infinity;
       let bestSeed = 0;
@@ -724,7 +725,8 @@ function ProcessData({
         await delay();
       }
       updateTeams(bestTeams);
-      console.log("weights:", WEIGHTS);
+      // console.log("max team size:", MAX_TEAM_SIZE);
+      // console.log("weights:", WEIGHTS);
       console.log("final score:", bestScore);
       console.log("best seed:", bestSeed);
       console.log(
