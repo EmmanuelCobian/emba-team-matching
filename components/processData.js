@@ -37,17 +37,8 @@ function ProcessData({
     return sequence;
   }
 
-  const findMinLabel = (col, uniqueVals) => {
-    let minLabel = uniqueVals[0];
-    let minSize = Infinity;
-    for (let i = 0; i < uniqueVals.length; i++) {
-      let size = emba[col].eq(uniqueVals[i]).sum();
-      if (size < minSize) {
-        minSize = size;
-        minLabel = uniqueVals[i];
-      }
-    }
-    return minLabel;
+  const argMin = (arr) => {
+    return arr.reduce((iMax, x, i, a) => (x < a[iMax] ? i : iMax), 0);
   };
 
   const handleAppend = (data, row, teamNum) => {
@@ -69,8 +60,17 @@ function ProcessData({
     return data;
   };
 
-  const argMin = (arr) => {
-    return arr.reduce((iMax, x, i, a) => (x < a[iMax] ? i : iMax), 0);
+  const findMinLabel = (col, uniqueVals) => {
+    let minLabel = uniqueVals[0];
+    let minSize = Infinity;
+    for (let i = 0; i < uniqueVals.length; i++) {
+      let size = emba[col].eq(uniqueVals[i]).sum();
+      if (size < minSize) {
+        minSize = size;
+        minLabel = uniqueVals[i];
+      }
+    }
+    return minLabel;
   };
 
   const getNumLabelPerTeam = (teams, colName, colValOptions) => {
@@ -116,8 +116,7 @@ function ProcessData({
 
     for (let i = 0; i < numRows; i++) {
       let row = data.loc({ rows: [i] });
-      let curLabel = row[col].iat(0);
-      if (curLabel != label) {
+      if (row[col].iat(0) != label) {
         continue;
       }
 
@@ -237,10 +236,51 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
-  // distribute min label evenly accross teams
-  // internationals
-  // vets?
-  const distributeMinLabelAssign = (data, teams, col) => {};
+  const distributeMinLabelAssign = (data, teams, col) => {
+    /*
+    - spread out the minLabel as much as possible
+    - cycle through the groups, checking for a minimum number of minLabelNum people
+    - this may or may not assign any remaining people. Depending on the number of col people left.
+    */
+    const minLabel = findMinLabel(col, ["FN", "US", "PR"]);
+    let numLabel = getNumLabelPerTeam(teams, col, [minLabel]);
+    let minNumLabel = 1;
+    let teamIndex = 0;
+    let numRows = data.shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      if (row[col].iat(0) != minLabel) {
+        continue;
+      }
+
+      let startIndex = teamIndex;
+      while (
+        numLabel[teamIndex] >= minNumLabel ||
+        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
+          teams[teamIndex].count().values[0] > 0)
+      ) {
+        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
+        if (startIndex == teamIndex) {
+          let minFN = Infinity;
+          for (let j = 0; j < teams.length; j++) {
+            if (numLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
+              minFN = numLabel[j];
+              teamIndex = j;
+            }
+          }
+          minNumLabel += 1;
+          break;
+        }
+      }
+      numLabel[teamIndex] += 1;
+      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+      data = data.drop({ index: [i] });
+    }
+
+    return { data: data, teams: teams };
+  };
 
   function assignVets(data, teams) {
     /* 
@@ -296,101 +336,6 @@ function ProcessData({
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
     }
-    return { data: data, teams: teams };
-  }
-
-  function assignInternationals(data, teams) {
-    /* 
-          - spread out the internationals as much as possible
-          - take note of the current num of domestic and international in each group
-          - cycle through the groups, checking for a minimum number of international students
-          - this can or cannot assign the remaining people. Depending on the number of international students left
-          */
-    const internationalStatus = "FN";
-    let numInternationals = getNumLabelPerTeam(teams, "Citizenship Status", [
-      internationalStatus,
-    ]);
-    let minInternationals = 1;
-    let teamIndex = 0;
-    let numRows = data.shape[0];
-    data = data.resetIndex();
-
-    for (let i = 0; i < numRows; i++) {
-      let row = data.loc({ rows: [i] });
-      let citizenStatus = row["Citizenship Status"].iat(0);
-      if (citizenStatus != internationalStatus) {
-        continue;
-      }
-
-      let startIndex = teamIndex;
-      while (
-        numInternationals[teamIndex] >= minInternationals ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        if (startIndex == teamIndex) {
-          let minFN = Infinity;
-          for (let j = 0; j < teams.length; j++) {
-            if (
-              numInternationals[j] < minFN &&
-              teams[j].shape[0] < MAX_TEAM_SIZE
-            ) {
-              minFN = numInternationals[j];
-              teamIndex = j;
-            }
-          }
-          minInternationals += 1;
-          break;
-        }
-      }
-      numInternationals[teamIndex] += 1;
-      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      data = data.drop({ index: [i] });
-    }
-
-    return { data: data, teams: teams };
-  }
-
-  function assignPQT(data, teams) {
-    const distributeLabel = "T";
-    let numDistLabel = getNumLabelPerTeam(teams, "PQT", [distributeLabel]);
-    let minPQT = 1;
-    let teamIndex = 0;
-    let numRows = data.shape[0];
-    data = data.resetIndex();
-
-    for (let i = 0; i < numRows; i++) {
-      let row = data.loc({ rows: [i] });
-      let citizenStatus = row["PQT"].iat(0);
-      if (citizenStatus != distributeLabel) {
-        continue;
-      }
-
-      let startIndex = teamIndex;
-      while (
-        numDistLabel[teamIndex] >= minPQT ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        if (startIndex == teamIndex) {
-          let minFN = Infinity;
-          for (let j = 0; j < teams.length; j++) {
-            if (numDistLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
-              minFN = numDistLabel[j];
-              teamIndex = j;
-            }
-          }
-          minPQT += 1;
-          break;
-        }
-      }
-      numDistLabel[teamIndex] += 1;
-      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      data = data.drop({ index: [i] });
-    }
-
     return { data: data, teams: teams };
   }
 
@@ -686,9 +631,6 @@ function ProcessData({
               2
             );
             break;
-          case "PQT":
-            ongoing = assignPQT(ongoing.data, ongoing.teams);
-            break;
           case "Employer":
             ongoing = assignEmployer(ongoing.data, ongoing.teams);
             break;
@@ -705,7 +647,18 @@ function ProcessData({
             ongoing = assignVets(ongoing.data, ongoing.teams);
             break;
           case "Citizen Status":
-            ongoing = assignInternationals(ongoing.data, ongoing.teams);
+            ongoing = distributeMinLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Citizenship Status"
+            );
+            break;
+          case "PQT":
+            ongoing = distributeMinLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "PQT"
+            );
             break;
           case "Industry":
             ongoing = fillRemainingAssign(
