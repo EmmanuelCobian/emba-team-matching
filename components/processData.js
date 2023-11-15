@@ -14,7 +14,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 100;
+  const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -236,13 +236,13 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
-  const distributeMinLabelAssign = (data, teams, col) => {
-    /*
-    - spread out the minLabel as much as possible
-    - cycle through the groups, checking for a minimum number of minLabelNum people
-    - this may or may not assign any remaining people. Depending on the number of col people left.
-    */
-    const minLabel = findMinLabel(col, ["FN", "US", "PR"]);
+  const distributeMinLabelAssign = (
+    data,
+    teams,
+    col,
+    allowedValues,
+  ) => {
+    const minLabel = findMinLabel(col, allowedValues);
     let numLabel = getNumLabelPerTeam(teams, col, [minLabel]);
     let minNumLabel = 1;
     let teamIndex = 0;
@@ -282,12 +282,63 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
+  const distributeMaxLabelAssign = (data, teams, col, allowedValues, containsEmpty, remainingValues) => {
+    if (containsEmpty && remainingValues.length == 0) {
+      return { data: data, teams: teams };
+    }
+    const minLabel = findMinLabel(col, containsEmpty ? remainingValues : allowedValues);
+    let numLabel = getNumLabelPerTeam(teams, col, containsEmpty ? allowedValues : [minLabel]);
+    let minNumLabel = Math.min(...numLabel) + 1;
+    let teamIndex = 0;
+    let numRows = data.shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      if (row[col].iat(0) != minLabel) {
+        continue;
+      }
+
+      let startIndex = teamIndex;
+      while (
+        numLabel[teamIndex] >= minNumLabel ||
+        (containsEmpty && numLabel[teamIndex][col].values.includes(minLabel)) ||
+        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
+        teams[teamIndex].count().values[0] > 0)
+      ) {
+        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
+        if (startIndex == teamIndex) {
+          let minFN = Infinity;
+          for (let j = 0; j < teams.length; j++) {
+            if (numLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
+              minFN = numLabel[j];
+              teamIndex = j;
+            }
+          }
+          minNumLabel += 1;
+          break;
+        }
+      }
+      numLabel[teamIndex] += 1;
+      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+      data = data.drop({ index: [i] });
+    }
+
+    if (containsEmpty) {
+      remainingValues.splice(remainingValues.indexOf(minLabel), 1);
+      return distributeMinLabelAssign(data, teams, col, allowedValues, true, remainingValues);
+    } else {
+      return { data: data, teams: teams };
+    }
+  }
+
+  // is assigning vets the same as distributing min labels in order from min to greatest until empty string?
   function assignVets(data, teams) {
     /* 
-          - Military students should be separated as much as possible, including their branch
-          - assign them to a team that isn't full and doesn't already have a vet
-          - if all teams have a vet, assign them to the team that has the least number of vets
-          */
+    - Military students should be separated as much as possible, including their branch
+    - assign them to a team that isn't full and doesn't already have a vet
+    - if all teams have a vet, assign them to the team that has the least number of vets
+    */
     const vetStatusOptions = ["Air Force", "Army", "Marine Corps", "Navy"];
     let numVets = getNumLabelPerTeam(
       teams,
@@ -612,13 +663,14 @@ function ProcessData({
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
         let rank = rankings[i].colLabel;
+        let allowedValues;
         switch (rank) {
           case "Gender":
             ongoing = minDistributeAssign(
               ongoing.data,
               ongoing.teams,
               "Gender",
-              "Women",
+              "Woman",
               2
             );
             break;
@@ -629,6 +681,42 @@ function ProcessData({
               "UR",
               "Underrepresented",
               2
+            );
+            break;
+          case "Military Status":
+            allowedValues = ["Air Force", "Army", "Marine Corps", "Navy"]
+            ongoing = distributeMaxLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Military Status",
+              allowedValues,
+              true, 
+              [...allowedValues]
+            );
+            break;
+          case "Citizenship Status":
+            allowedValues = ["FN", "US", "PR"]
+            ongoing = distributeMinLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Citizenship Status",
+              allowedValues
+            );
+            break;
+          case "PQT":
+            allowedValues = ["P", "Q", "T"]
+            ongoing = distributeMinLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "PQT",
+              allowedValues
+            );
+            break;
+          case "Industry":
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Industry"
             );
             break;
           case "Employer":
@@ -642,30 +730,6 @@ function ProcessData({
             break;
           case "Ethnicity":
             ongoing = assignEthnicity(ongoing.data, ongoing.teams);
-            break;
-          case "Military Status":
-            ongoing = assignVets(ongoing.data, ongoing.teams);
-            break;
-          case "Citizen Status":
-            ongoing = distributeMinLabelAssign(
-              ongoing.data,
-              ongoing.teams,
-              "Citizenship Status"
-            );
-            break;
-          case "PQT":
-            ongoing = distributeMinLabelAssign(
-              ongoing.data,
-              ongoing.teams,
-              "PQT"
-            );
-            break;
-          case "Industry":
-            ongoing = fillRemainingAssign(
-              ongoing.data,
-              ongoing.teams,
-              "Industry"
-            );
             break;
           default:
             ongoing = ongoing;
