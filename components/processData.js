@@ -99,9 +99,9 @@ function ProcessData({
     return result;
   };
 
-  const getDupes = (team, industry) => {
+  const getLabelDupes = (team, label) => {
     let teamSeries = new dfd.Series(team);
-    let boolMask = teamSeries.eq(industry);
+    let boolMask = teamSeries.eq(label);
     return boolMask.sum();
   };
 
@@ -169,14 +169,78 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
+  const fillRemainingAssign = (data, teams, col) => {
+    /*
+    - make note of what values are present from this column in each team
+    - look at the next person and assign them to a group that doesn't already have their label (if there's space)
+    - if there's not team that has different labels for this col, assign them to a team that has the least number of duplicates for their label
+    - this will assign any remaining people
+    */
+    let teamIndex = 0;
+    let teamLabels = getAggLabelPerTeam(teams, col);
+    let numRows = data.shape[0];
+    let teamSize = teams[teamIndex].shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      let label = row[col].iat(0);
+
+      let minDupeTeamIndex = teamIndex;
+      let minDupeTeamSize = teamSize;
+      let minDupes =
+        teamLabels[teamIndex] && teamLabels[teamIndex].length > 0
+          ? getLabelDupes(teamLabels[teamIndex], label)
+          : Infinity;
+
+      let startIndex = teamIndex;
+      while (
+        teamLabels[teamIndex].includes(label) ||
+        (teamSize >= MAX_TEAM_SIZE && teams[teamIndex].count().values[0] > 0)
+      ) {
+        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
+        teamSize = teams[teamIndex].shape[0];
+        let dupes = getLabelDupes(teamLabels[teamIndex], label);
+
+        if (
+          dupes <= minDupes &&
+          teamSize < minDupeTeamSize &&
+          teamSize <= MAX_TEAM_SIZE
+        ) {
+          minDupes = dupes;
+          minDupeTeamIndex = teamIndex;
+          minDupeTeamSize = teamSize;
+        }
+        if (teamIndex == startIndex) {
+          // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
+          // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
+          // assign this person to the smallest team
+          if (minDupeTeamSize > MAX_TEAM_SIZE) {
+            teamIndex = argMin(teams.map((team) => team.shape[0]));
+          } else {
+            teamIndex = minDupeTeamIndex;
+          }
+          break;
+        }
+      }
+
+      if (teamLabels[teamIndex][0] == null) {
+        teamLabels[teamIndex] = [label];
+      } else {
+        teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
+      }
+      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+      teamSize = teams[teamIndex].shape[0];
+      data = data.drop({ index: [i] });
+    }
+
+    return { data: data, teams: teams };
+  };
+
   // distribute min label evenly accross teams
   // internationals
   // vets?
   const distributeMinLabelAssign = (data, teams, col) => {};
-
-  // distribute to fill remaining spots on teams
-  // industries
-  const fillRemainingAssign = (data, teams, col) => {};
 
   function assignVets(data, teams) {
     /* 
@@ -282,76 +346,6 @@ function ProcessData({
       }
       numInternationals[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      data = data.drop({ index: [i] });
-    }
-
-    return { data: data, teams: teams };
-  }
-
-  function assignIndustries(data, teams) {
-    /* 
-          - make note of what industries are already in the group
-          - look at the next applicant and assign them to a group that doesn't already have their industry (if there's space)
-          - if there's no team that has different industries, assign them to a team that has the last number of their industry
-          - this will assign any remaining people
-          */
-    let teamIndex = 0;
-    let teamIndustries = getAggLabelPerTeam(teams, "Industry");
-    let numRows = data.shape[0];
-    let teamSize = teams[teamIndex].shape[0];
-    data = data.resetIndex();
-
-    for (let i = 0; i < numRows; i++) {
-      let row = data.loc({ rows: [i] });
-      let industry = row["Industry"].iat(0);
-
-      let minDupeTeamIndex = teamIndex;
-      let minDupeTeamSize = teamSize;
-      let minDupes =
-        teamIndustries[teamIndex] && teamIndustries[teamIndex].length > 0
-          ? getDupes(teamIndustries[teamIndex], industry)
-          : Infinity;
-
-      let startIndex = teamIndex;
-      while (
-        teamIndustries[teamIndex].includes(industry) ||
-        (teamSize >= MAX_TEAM_SIZE && teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        teamSize = teams[teamIndex].shape[0];
-        let dupes = getDupes(teamIndustries[teamIndex], industry);
-
-        if (
-          dupes <= minDupes &&
-          teamSize < minDupeTeamSize &&
-          teamSize <= MAX_TEAM_SIZE
-        ) {
-          minDupes = dupes;
-          minDupeTeamIndex = teamIndex;
-          minDupeTeamSize = teamSize;
-        }
-        if (teamIndex == startIndex) {
-          // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
-          // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
-          // assign this person to the smallest team
-          if (minDupeTeamSize > MAX_TEAM_SIZE) {
-            teamIndex = argMin(teams.map((team) => team.shape[0]));
-          } else {
-            teamIndex = minDupeTeamIndex;
-          }
-          break;
-        }
-      }
-
-      if (teamIndustries[teamIndex][0] == null) {
-        teamIndustries[teamIndex] = [industry];
-      } else {
-        teamIndustries[teamIndex] = teamIndustries[teamIndex].concat([
-          industry,
-        ]);
-      }
-      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      teamSize = teams[teamIndex].shape[0];
       data = data.drop({ index: [i] });
     }
 
@@ -714,7 +708,11 @@ function ProcessData({
             ongoing = assignInternationals(ongoing.data, ongoing.teams);
             break;
           case "Industry":
-            ongoing = assignIndustries(ongoing.data, ongoing.teams);
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Industry"
+            );
             break;
           default:
             ongoing = ongoing;
