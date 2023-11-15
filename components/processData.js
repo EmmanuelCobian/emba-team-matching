@@ -37,7 +37,7 @@ function ProcessData({
     return sequence;
   }
 
-  function findMinLabel(col, uniqueVals) {
+  const findMinLabel = (col, uniqueVals) => {
     let minLabel = uniqueVals[0];
     let minSize = Infinity;
     for (let i = 0; i < uniqueVals.length; i++) {
@@ -48,9 +48,9 @@ function ProcessData({
       }
     }
     return minLabel;
-  }
+  };
 
-  function handleAppend(data, row, teamNum) {
+  const handleAppend = (data, row, teamNum) => {
     let newData = { Team: [teamNum] };
     let newRow = new dfd.DataFrame(newData);
     let rowCols = row.columns;
@@ -67,29 +67,29 @@ function ProcessData({
       data.resetIndex({ inplace: true });
     }
     return data;
-  }
+  };
 
-  function argMin(arr) {
+  const argMin = (arr) => {
     return arr.reduce((iMax, x, i, a) => (x < a[iMax] ? i : iMax), 0);
-  }
+  };
 
-  function getNumLabelPerTeam(teams, colName, colValOptions) {
-    let result = []
+  const getNumLabelPerTeam = (teams, colName, colValOptions) => {
+    let result = [];
     for (let i = 0; i < teams.length; i++) {
-      let items = teams[i][colName].values
-      let numLabel = 0
+      let items = teams[i][colName].values;
+      let numLabel = 0;
       for (let j = 0; j < items.length; j++) {
-        let item = items[j]
+        let item = items[j];
         if (colValOptions.includes(item)) {
-          numLabel += 1
+          numLabel += 1;
         }
       }
-      result.push(numLabel)
+      result.push(numLabel);
     }
-    return result
-  }
+    return result;
+  };
 
-  function getAggLabelPerTeam(teams, colName) {
+  const getAggLabelPerTeam = (teams, colName) => {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
       let industries = teams[i][colName].values;
@@ -97,81 +97,66 @@ function ProcessData({
     }
 
     return result;
-  }
+  };
 
-  function getDupes(team, industry) {
+  const getDupes = (team, industry) => {
     let teamSeries = new dfd.Series(team);
     let boolMask = teamSeries.eq(industry);
     return boolMask.sum();
-  }
+  };
 
-  // distribute with min # labels per group
-    // min 2 women per team
-    // min 2 underrepresented per team
-    
-  // distribute min label evenly accross teams
-    // internationals
-    // vets?
-  
-  // distribute to fill remaining spots on teams
-    // industries
-
-  function assignWomen(data, teams) {
-    /* 
-          - min number of women per team = 2
-          - if each team already has 2 women, go back to the start and assign 1 more iteratively until there's no more
-          - if there's only 1 women in a team, assign that women to the next team with the least amount of women
-      */
-
+  const minDistributeAssign = (data, teams, col, label, minNum) => {
+    /* - min number of label in col is minNum
+    - if each team already has minNum of label, go back to the start and assign 1 more iteratively until there's no more of label
+    - if there's only 1 of label in a team, assign that label to the net team with the least amount of labels */
     let teamIndex = 0;
-    let minNumWomen = 2;
-    let numWomen = getNumLabelPerTeam(teams, "Gender", ["Woman"]);
+    let numLabel = getNumLabelPerTeam(teams, col, [label]);
     let numRows = data.shape[0];
     data = data.resetIndex();
 
     for (let i = 0; i < numRows; i++) {
       let row = data.loc({ rows: [i] });
-      let gender = row["Gender"].iat(0);
-      if (gender != "Woman") {
+      let curLabel = row[col].iat(0);
+      if (curLabel != label) {
         continue;
       }
 
       let startIndex = teamIndex;
       while (
-        numWomen[teamIndex] >= minNumWomen ||
+        numLabel[teamIndex] >= minNum ||
         (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          numWomen[teamIndex] != 1 &&
+          numLabel[teamIndex] != 1 &&
           teams[teamIndex].count().values[0] > 0)
       ) {
         teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
 
         if (startIndex == teamIndex) {
-          minNumWomen += 1;
-          teamIndex = argMin(numWomen);
+          minNum += 1;
+          teamIndex = argMin(numLabel);
           break;
         }
       }
 
-      numWomen[teamIndex] += 1;
+      numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
     }
 
-    if (numWomen[teamIndex] == 1) {
+    if (numLabel[teamIndex] == 1) {
       let lastPersonAdded = teams[teamIndex].iloc({
         rows: [teams[teamIndex].shape[0] - 1],
       });
       teams[teamIndex] = teams[teamIndex].drop({
         index: [teams[teamIndex].shape[0] - 1],
       });
-      numWomen[teamIndex] -= 1;
+      numLabel[teamIndex] -= 1;
 
       let nWomenFilter = [];
       for (let i = 0; i < teams.length; i++) {
-        if (numWomen[i] <= 1) {
+        if (numLabel[i] <= 1) {
           nWomenFilter.push(Infinity);
         } else {
-          nWomenFilter.push(numWomen[i]);
+          nWomenFilter.push(numLabel[i]);
         }
       }
       teamIndex = argMin(nWomenFilter);
@@ -182,7 +167,16 @@ function ProcessData({
       );
     }
     return { data: data, teams: teams };
-  }
+  };
+
+  // distribute min label evenly accross teams
+  // internationals
+  // vets?
+  const distributeMinLabelAssign = (data, teams, col) => {};
+
+  // distribute to fill remaining spots on teams
+  // industries
+  const fillRemainingAssign = (data, teams, col) => {};
 
   function assignVets(data, teams) {
     /* 
@@ -191,7 +185,11 @@ function ProcessData({
           - if all teams have a vet, assign them to the team that has the least number of vets
           */
     const vetStatusOptions = ["Air Force", "Army", "Marine Corps", "Navy"];
-    let numVets = getNumLabelPerTeam(teams, "Military Status", vetStatusOptions);
+    let numVets = getNumLabelPerTeam(
+      teams,
+      "Military Status",
+      vetStatusOptions
+    );
     let minVetNum = 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -245,7 +243,9 @@ function ProcessData({
           - this can or cannot assign the remaining people. Depending on the number of international students left
           */
     const internationalStatus = "FN";
-    let numInternationals = getNumLabelPerTeam(teams, "Citizenship Status", [internationalStatus]);
+    let numInternationals = getNumLabelPerTeam(teams, "Citizenship Status", [
+      internationalStatus,
+    ]);
     let minInternationals = 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -383,10 +383,7 @@ function ProcessData({
         if (startIndex == teamIndex) {
           let minFN = Infinity;
           for (let j = 0; j < teams.length; j++) {
-            if (
-              numDistLabel[j] < minFN &&
-              teams[j].shape[0] < MAX_TEAM_SIZE
-            ) {
+            if (numDistLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
               minFN = numDistLabel[j];
               teamIndex = j;
             }
@@ -400,30 +397,26 @@ function ProcessData({
       data = data.drop({ index: [i] });
     }
 
-    return { data: data, teams: teams }
-  }
-
-  function assignUR(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function assignEthnicity(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function assignEmployer(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function assignUGSchoolName(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
   function assignUGSchoolMajor(data, teams) {
-    return { data: data, teams: teams }
+    return { data: data, teams: teams };
   }
 
-  function dataValidation(data) {
+  const dataValidation = (data) => {
     let uniqueValues;
     let allowedValues;
     let ranks = rankings.map((elm) => elm.colLabel);
@@ -558,9 +551,9 @@ function ProcessData({
     }
 
     // check that there aren't any # characters
-  }
+  };
 
-  function checkValues(values, allowedValues, category) {
+  const checkValues = (values, allowedValues, category) => {
     for (let i = 0; i < values.shape[0]; i++) {
       let value = values.iat(i);
       if (!allowedValues.includes(value)) {
@@ -568,10 +561,10 @@ function ProcessData({
         throw new Error(category + " error");
       }
     }
-  }
+  };
 
   useEffect(() => {
-    function scoreOneTeam(team) {
+    const scoreOneTeam = (team) => {
       if (team.count().values[0] == 0) {
         return 0;
       }
@@ -625,8 +618,8 @@ function ProcessData({
             score += numInternationals * weight;
             break;
           case "Continent":
-            let numUniqueCont = team['Continent'].nUnique()
-            score += numUniqueCont * weight
+            let numUniqueCont = team["Continent"].nUnique();
+            score += numUniqueCont * weight;
             break;
           case "Industry":
             let numDiffIndustries = team["Industry"].nUnique();
@@ -642,9 +635,9 @@ function ProcessData({
         }
       }
       return score;
-    }
+    };
 
-    async function scoreIteration(teams) {
+    const scoreIteration = async (teams) => {
       // given one iteration, find a score and only keep the best one
       // the objective function is minimizing the difference in scores between teams
       let scores = [];
@@ -666,9 +659,9 @@ function ProcessData({
       let differences = scorePairs.map((pair) => Math.abs(pair[0] - pair[1]));
       let result = Math.max(...differences);
       return result;
-    }
+    };
 
-    async function oneIteration(data) {
+    const oneIteration = async (data) => {
       let teams = new Array(numTeams);
       let cols = ["Team"];
       let numCols = cols.push(...data.columns);
@@ -682,25 +675,37 @@ function ProcessData({
         let rank = rankings[i].colLabel;
         switch (rank) {
           case "Gender":
-            ongoing = assignWomen(ongoing.data, ongoing.teams);
-            break;
-          case "PQT":
-            ongoing = assignPQT(ongoing.data, ongoing.teams)
+            ongoing = minDistributeAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Gender",
+              "Women",
+              2
+            );
             break;
           case "UR":
-            ongoing = assignUR(ongoing.data, ongoing.teams)
+            ongoing = minDistributeAssign(
+              ongoing.data,
+              ongoing.teams,
+              "UR",
+              "Underrepresented",
+              2
+            );
+            break;
+          case "PQT":
+            ongoing = assignPQT(ongoing.data, ongoing.teams);
             break;
           case "Employer":
-            ongoing = assignEmployer(ongoing.data, ongoing.teams)
+            ongoing = assignEmployer(ongoing.data, ongoing.teams);
             break;
           case "UG School Name":
-            ongoing = assignUGSchoolName(ongoing.data, ongoing.teams)
+            ongoing = assignUGSchoolName(ongoing.data, ongoing.teams);
             break;
           case "UG School Major":
-            ongoing = assignUGSchoolMajor(ongoing.data, ongoing.teams)
-            break; 
+            ongoing = assignUGSchoolMajor(ongoing.data, ongoing.teams);
+            break;
           case "Ethnicity":
-            ongoing = assignEthnicity(ongoing.data, ongoing.teams)
+            ongoing = assignEthnicity(ongoing.data, ongoing.teams);
             break;
           case "Military Status":
             ongoing = assignVets(ongoing.data, ongoing.teams);
@@ -718,9 +723,9 @@ function ProcessData({
       }
       // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
       return { teams: ongoing.teams, seed: seed };
-    }
+    };
 
-    async function findBestTeams(data, nIterations) {
+    const findBestTeams = async (data, nIterations) => {
       try {
         dataValidation(data);
       } catch (error) {
@@ -754,7 +759,7 @@ function ProcessData({
         rankings.map((rank) => rank.colLabel)
       );
       setTimeout(() => jumpTo("display"), 2000);
-    }
+    };
 
     if (!afterRender) return;
     // here DOM is loaded and you can query DOM elements
