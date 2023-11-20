@@ -12,7 +12,7 @@ function ProcessData({
   catchError,
 }) {
   let emba = new dfd.DataFrame(inputData.data);
-  const MAX_TEAM_SIZE = Math.floor(emba.shape[0] / numTeams);
+  const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   const NUM_ITERATIONS = 1;
   // const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
@@ -73,6 +73,20 @@ function ProcessData({
     return minLabel;
   };
 
+  const getTeamSizes = (teams) => {
+    let result = []
+    teams.forEach((team) => {
+      let firstRow = team.iloc({ rows: [0] });
+      let nonNaCount = firstRow.count();
+      if (nonNaCount.values[0] == 0) {
+        result.push(0)
+      } else {
+        result.push(team.shape[0])
+      }
+    })
+    return result
+  }
+
   const getNumLabelPerTeam = (teams, colName, colValOptions) => {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
@@ -111,6 +125,7 @@ function ProcessData({
     - if there's only 1 of label in a team, assign that label to the net team with the least amount of labels */
     let teamIndex = 0;
     let numLabel = getNumLabelPerTeam(teams, col, [label]);
+    let teamSizes = getTeamSizes(teams);
     let numRows = data.shape[0];
     data = data.resetIndex();
 
@@ -123,8 +138,7 @@ function ProcessData({
       let startIndex = teamIndex;
       while (
         numLabel[teamIndex] >= minNum ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          numLabel[teamIndex] != 1 &&
+        (teamSizes[teamIndex] >= MAX_TEAM_SIZE &&
           teams[teamIndex].count().values[0] > 0)
       ) {
         teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
@@ -135,7 +149,7 @@ function ProcessData({
           break;
         }
       }
-
+      teamSizes[teamIndex] += 1
       numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
@@ -144,10 +158,10 @@ function ProcessData({
     // TODO: fix this to handle larger input sizes
     if (numLabel[teamIndex] == 1) {
       let lastPersonAdded = teams[teamIndex].iloc({
-        rows: [teams[teamIndex].shape[0] - 1],
+        rows: [teamSizes[teamIndex] - 1],
       });
       teams[teamIndex] = teams[teamIndex].drop({
-        index: [teams[teamIndex].shape[0] - 1],
+        index: [teamSizes[teamIndex] - 1],
       });
       numLabel[teamIndex] -= 1;
 
@@ -178,8 +192,8 @@ function ProcessData({
     */
     let teamIndex = 0;
     let teamLabels = getAggLabelPerTeam(teams, col);
+    let teamSizes = getTeamSizes(teams)
     let numRows = data.shape[0];
-    let teamSize = teams[teamIndex].shape[0];
     data = data.resetIndex();
 
     for (let i = 0; i < numRows; i++) {
@@ -187,7 +201,7 @@ function ProcessData({
       let label = row[col].iat(0);
 
       let minDupeTeamIndex = teamIndex;
-      let minDupeTeamSize = teamSize;
+      let minDupeTeamSize = teamSizes[teamIndex];
       let minDupes =
         teamLabels[teamIndex] && teamLabels[teamIndex].length > 0
           ? getLabelDupes(teamLabels[teamIndex], label)
@@ -196,27 +210,26 @@ function ProcessData({
       let startIndex = teamIndex;
       while (
         teamLabels[teamIndex].includes(label) ||
-        (teamSize >= MAX_TEAM_SIZE && teams[teamIndex].count().values[0] > 0)
+        (teamSizes[teamIndex] >= MAX_TEAM_SIZE && teams[teamIndex].count().values[0] > 0)
       ) {
         teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        teamSize = teams[teamIndex].shape[0];
         let dupes = getLabelDupes(teamLabels[teamIndex], label);
 
         if (
           dupes <= minDupes &&
-          teamSize < minDupeTeamSize &&
-          teamSize <= MAX_TEAM_SIZE
+          teamSizes[teamIndex] < minDupeTeamSize &&
+          teamSizes[teamIndex] <= MAX_TEAM_SIZE
         ) {
           minDupes = dupes;
           minDupeTeamIndex = teamIndex;
-          minDupeTeamSize = teamSize;
+          minDupeTeamSize = teamSizes[teamIndex];
         }
         if (teamIndex == startIndex) {
           // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
           // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
           // assign this person to the smallest team
           if (minDupeTeamSize > MAX_TEAM_SIZE) {
-            teamIndex = argMin(teams.map((team) => team.shape[0]));
+            teamIndex = argMin(teamSizes);
           } else {
             teamIndex = minDupeTeamIndex;
           }
@@ -230,7 +243,7 @@ function ProcessData({
         teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
       }
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      teamSize = teams[teamIndex].shape[0];
+      teamSizes[teamIndex] += 1
       data = data.drop({ index: [i] });
     }
 
@@ -243,6 +256,7 @@ function ProcessData({
     }
     const minLabel = findMinLabel(col, containsEmpty ? remainingValues : allowedValues);
     let numLabel = getNumLabelPerTeam(teams, col, containsEmpty ? allowedValues : [minLabel]);
+    let teamSizes = getTeamSizes(teams)
     let minNumLabel = Math.min(...numLabel) + 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -258,14 +272,14 @@ function ProcessData({
       while (
         numLabel[teamIndex] >= minNumLabel ||
         (containsEmpty && teams[teamIndex][col].values.includes(minLabel)) ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
+        (teamSizes[teamIndex] >= MAX_TEAM_SIZE &&
         teams[teamIndex].count().values[0] > 0)
       ) {
         teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
         if (startIndex == teamIndex) {
           let minFN = Infinity;
           for (let j = 0; j < teams.length; j++) {
-            if (numLabel[j] < minFN && teams[j].shape[0] < MAX_TEAM_SIZE) {
+            if (numLabel[j] < minFN && teamSizes[j] < MAX_TEAM_SIZE) {
               minFN = numLabel[j];
               teamIndex = j;
             }
@@ -274,6 +288,7 @@ function ProcessData({
           break;
         }
       }
+      teamSizes[teamIndex] += 1;
       numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
@@ -313,7 +328,6 @@ function ProcessData({
       }
 
       let startIndex = teamIndex;
-      // TODO: look into the edge cases in this loop
       while (
         numVets[teamIndex] >= minVetNum ||
         teams[teamIndex]["Military Status"].values.includes(militaryStatus) ||
