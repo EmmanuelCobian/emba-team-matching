@@ -13,8 +13,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 1;
-  // const NUM_ITERATIONS = 1000;
+  // const NUM_ITERATIONS = 12500;
+  const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -74,18 +74,18 @@ function ProcessData({
   };
 
   const getTeamSizes = (teams) => {
-    let result = []
+    let result = [];
     teams.forEach((team) => {
       let firstRow = team.iloc({ rows: [0] });
       let nonNaCount = firstRow.count();
       if (nonNaCount.values[0] == 0) {
-        result.push(0)
+        result.push(0);
       } else {
-        result.push(team.shape[0])
+        result.push(team.shape[0]);
       }
-    })
-    return result
-  }
+    });
+    return result;
+  };
 
   const getNumLabelPerTeam = (teams, colName, colValOptions) => {
     let result = [];
@@ -149,7 +149,7 @@ function ProcessData({
           break;
         }
       }
-      teamSizes[teamIndex] += 1
+      teamSizes[teamIndex] += 1;
       numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       data = data.drop({ index: [i] });
@@ -185,14 +185,9 @@ function ProcessData({
 
   const fillRemainingAssign = (data, teams, col) => {
     /*
-    - make note of what values are present from this column in each team
-    - look at the next person and assign them to a group that doesn't already have their label (if there's space)
-    - if there's not team that has different labels for this col, assign them to a team that has the least number of duplicates for their label
-    - this will assign any remaining people
     */
-    let teamIndex = 0;
     let teamLabels = getAggLabelPerTeam(teams, col);
-    let teamSizes = getTeamSizes(teams)
+    let teamSizes = getTeamSizes(teams);
     let numRows = data.shape[0];
     data = data.resetIndex();
 
@@ -200,63 +195,50 @@ function ProcessData({
       let row = data.loc({ rows: [i] });
       let label = row[col].iat(0);
 
-      let minDupeTeamIndex = teamIndex;
-      let minDupeTeamSize = teamSizes[teamIndex];
-      let minDupes =
-        teamLabels[teamIndex] && teamLabels[teamIndex].length > 0
-          ? getLabelDupes(teamLabels[teamIndex], label)
-          : Infinity;
-
-      let startIndex = teamIndex;
-      while (
-        teamLabels[teamIndex].includes(label) ||
-        (teamSizes[teamIndex] >= MAX_TEAM_SIZE && teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        let dupes = getLabelDupes(teamLabels[teamIndex], label);
-
+      let dupesPerTeam = teamLabels.map((team) => getLabelDupes(team, label));
+      let teamIndex = 0;
+      let minDupes = Infinity;
+      let minDupeTeamSize = Infinity;
+      for (let index = 0; index < dupesPerTeam.length; index++) {
+        let dupes = dupesPerTeam[index];
+        let teamSize = teamSizes[index];
         if (
           dupes <= minDupes &&
-          teamSizes[teamIndex] < minDupeTeamSize &&
-          teamSizes[teamIndex] <= MAX_TEAM_SIZE
+          teamSize <= minDupeTeamSize &&
+          teamSize < MAX_TEAM_SIZE
         ) {
+          teamIndex = index;
           minDupes = dupes;
-          minDupeTeamIndex = teamIndex;
-          minDupeTeamSize = teamSizes[teamIndex];
-        }
-        if (teamIndex == startIndex) {
-          // handle the edge case where the team we wanna add this person to has the smallest number of duplicates but we weren't able to find
-          // another team that has the same, or fewer, dupes and with a smaller team size, AND the min dupe team index is alreacy full
-          // assign this person to the smallest team
-          if (minDupeTeamSize > MAX_TEAM_SIZE) {
-            teamIndex = argMin(teamSizes);
-          } else {
-            teamIndex = minDupeTeamIndex;
-          }
-          break;
+          minDupeTeamSize = teamSizes[index];
         }
       }
-
       if (teamLabels[teamIndex][0] == null) {
         teamLabels[teamIndex] = [label];
       } else {
         teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
       }
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      teamSizes[teamIndex] += 1
+      teamSizes[teamIndex] += 1;
       data = data.drop({ index: [i] });
     }
 
     return { data: data, teams: teams };
   };
 
-  const distributeMinLabelAssign = (data, teams, col, allowedValues, containsEmpty, remainingValues) => {
+  const distributeMinLabelAssign = (
+    data,
+    teams,
+    col,
+    allowedValues,
+    containsEmpty,
+    remainingValues
+  ) => {
     if (containsEmpty && remainingValues.length == 0) {
       return { data: data, teams: teams };
     }
     const minLabel = findMinLabel(col, containsEmpty ? remainingValues : allowedValues);
     let numLabel = getNumLabelPerTeam(teams, col, containsEmpty ? allowedValues : [minLabel]);
-    let teamSizes = getTeamSizes(teams)
+    let teamSizes = getTeamSizes(teams);
     let minNumLabel = Math.min(...numLabel) + 1;
     let teamIndex = 0;
     let numRows = data.shape[0];
@@ -273,7 +255,7 @@ function ProcessData({
         numLabel[teamIndex] >= minNumLabel ||
         (containsEmpty && teams[teamIndex][col].values.includes(minLabel)) ||
         (teamSizes[teamIndex] >= MAX_TEAM_SIZE &&
-        teams[teamIndex].count().values[0] > 0)
+          teams[teamIndex].count().values[0] > 0)
       ) {
         teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
         if (startIndex == teamIndex) {
@@ -296,68 +278,18 @@ function ProcessData({
 
     if (containsEmpty) {
       remainingValues.splice(remainingValues.indexOf(minLabel), 1);
-      return distributeMinLabelAssign(data, teams, col, allowedValues, true, remainingValues);
+      return distributeMinLabelAssign(
+        data,
+        teams,
+        col,
+        allowedValues,
+        true,
+        remainingValues
+      );
     } else {
       return { data: data, teams: teams };
     }
-  }
-
-  // is assigning vets the same as distributing min labels in order from min to greatest until empty string?
-  function assignVets(data, teams) {
-    /* 
-    - Military students should be separated as much as possible, including their branch
-    - assign them to a team that isn't full and doesn't already have a vet
-    - if all teams have a vet, assign them to the team that has the least number of vets
-    */
-    const vetStatusOptions = ["Air Force", "Army", "Marine Corps", "Navy"];
-    let numVets = getNumLabelPerTeam(
-      teams,
-      "Military Status",
-      vetStatusOptions
-    );
-    let minVetNum = 1;
-    let teamIndex = 0;
-    let numRows = data.shape[0];
-    data = data.resetIndex();
-
-    for (let i = 0; i < numRows; i++) {
-      let row = data.loc({ rows: [i] });
-      let militaryStatus = row["Military Status"].iat(0);
-      if (!vetStatusOptions.includes(militaryStatus)) {
-        continue;
-      }
-
-      let startIndex = teamIndex;
-      while (
-        numVets[teamIndex] >= minVetNum ||
-        teams[teamIndex]["Military Status"].values.includes(militaryStatus) ||
-        (teams[teamIndex].shape[0] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        if (startIndex == teamIndex) {
-          minVetNum++;
-          let noDupeTeams = [];
-          for (let j = 0; j < teams.length; j++) {
-            let teamMilitary = teams[j]["Military Status"].values;
-            if (!teamMilitary.includes(militaryStatus)) {
-              noDupeTeams.push(numVets[j]);
-            } else {
-              noDupeTeams.push(Infinity);
-            }
-          }
-          teamIndex =
-            noDupeTeams.length > 0 ? argMin(noDupeTeams) : argMin(numVets);
-          break;
-        }
-      }
-
-      numVets[teamIndex] += 1;
-      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
-      data = data.drop({ index: [i] });
-    }
-    return { data: data, teams: teams };
-  }
+  };
 
   const dataValidation = (data) => {
     let uniqueValues;
@@ -611,8 +543,8 @@ function ProcessData({
       teams.fill(
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
-      // let seed = Math.random();
-      let seed = 0.45079499374715326
+      let seed = Math.random();
+      // let seed = 0.39444043837982845;
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
@@ -638,18 +570,18 @@ function ProcessData({
             );
             break;
           case "Military Status":
-            allowedValues = ["Air Force", "Army", "Marine Corps", "Navy"]
+            allowedValues = ["Air Force", "Army", "Marine Corps", "Navy"];
             ongoing = distributeMinLabelAssign(
               ongoing.data,
               ongoing.teams,
               "Military Status",
               allowedValues,
-              true, 
+              true,
               [...allowedValues]
             );
             break;
           case "Citizenship Status":
-            allowedValues = ["FN", "US"]
+            allowedValues = ["FN", "US"];
             ongoing = distributeMinLabelAssign(
               ongoing.data,
               ongoing.teams,
@@ -660,7 +592,7 @@ function ProcessData({
             );
             break;
           case "PQT":
-            allowedValues = ["P", "Q", "T"]
+            allowedValues = ["P", "Q", "T"];
             ongoing = distributeMinLabelAssign(
               ongoing.data,
               ongoing.teams,
