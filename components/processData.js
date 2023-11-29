@@ -14,7 +14,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 1000;
+  const NUM_ITERATIONS = 5000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
