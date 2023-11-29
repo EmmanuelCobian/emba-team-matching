@@ -184,8 +184,6 @@ function ProcessData({
   };
 
   const fillRemainingAssign = (data, teams, col) => {
-    /*
-    */
     let teamLabels = getAggLabelPerTeam(teams, col);
     let teamSizes = getTeamSizes(teams);
     let numRows = data.shape[0];
@@ -212,13 +210,13 @@ function ProcessData({
           minDupeTeamSize = teamSizes[index];
         }
       }
-      if (teamLabels[teamIndex][0] == null) {
-        teamLabels[teamIndex] = [label];
-      } else {
-        teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
-      }
+
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       teamSizes[teamIndex] += 1;
+      teamLabels[teamIndex] =
+        teamLabels[teamIndex][0] == null
+          ? [label]
+          : teamLabels[teamIndex].concat([label]);
       data = data.drop({ index: [i] });
     }
 
@@ -236,8 +234,15 @@ function ProcessData({
     if (containsEmpty && remainingValues.length == 0) {
       return { data: data, teams: teams };
     }
-    const minLabel = findMinLabel(col, containsEmpty ? remainingValues : allowedValues);
-    let numLabel = getNumLabelPerTeam(teams, col, containsEmpty ? allowedValues : [minLabel]);
+    const minLabel = findMinLabel(
+      col,
+      containsEmpty ? remainingValues : allowedValues
+    );
+    let numLabel = getNumLabelPerTeam(
+      teams,
+      col,
+      containsEmpty ? allowedValues : [minLabel]
+    );
     let teamSizes = getTeamSizes(teams);
     let minNumLabel = Math.min(...numLabel) + 1;
     let teamIndex = 0;
@@ -544,7 +549,6 @@ function ProcessData({
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
       let seed = Math.random();
-      // let seed = 0.39444043837982845;
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
