@@ -3,11 +3,10 @@ import { Button, Row, Col } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
-import ListGroup from "react-bootstrap/ListGroup";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import classnames from "classnames";
+import DndTab from "./dndTab";
 import styles from "@/styles/GetParams.module.css";
 
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
@@ -113,6 +112,8 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const [numTeams, setNumTeams] = useState("");
   const [groupSize, setGroupSize] = useState("");
 
+  const updateFinalRankings = (ranks) => setFinalRankings(ranks);
+
   const onNumTeamsInput = ({ target: { value } }) => {
     setNumTeams(value);
     setGroupSize(Math.ceil(dataLen / value));
@@ -122,62 +123,6 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     setGroupSize(value);
     setNumTeams(Math.ceil(dataLen / value));
   };
-
-  const handleCheckChange = (e) => {
-    let rankTarget = e.target.id;
-    let items = Array.from(finalRankings[selectedGroup]);
-    for (let i = 0; i < items.length; i++) {
-      let rank = items[i];
-      if (rank.displayValue == rankTarget) {
-        rank.disabled = e.target.checked;
-        if (e.target.checked) {
-          items.splice(i, 1);
-          items.splice(items.length, 0, rank);
-        } else {
-          items[i] = rank;
-        }
-        setFinalRankings((prevState) => ({
-          ...prevState,
-          [selectedGroup]: items,
-        }));
-      }
-    }
-  };
-
-  function handleOnDragEnd(result) {
-    if (!result.destination) {
-      return;
-    }
-    const items = Array.from(finalRankings[selectedGroup]);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setFinalRankings((prevState) => ({
-      ...prevState,
-      [selectedGroup]: items,
-    }));
-  }
-
-  function getItemStyle(isDragging, isDragDisabled, draggableStyle) {
-    return {
-      // some basic styles to make the items look a bit nicer
-      userSelect: "none",
-      padding: 8 * 2,
-      margin: `0 0 8px 0`,
-
-      // change background colour if dragging
-      background: isDragDisabled
-        ? "#46535E"
-        : isDragging
-        ? "#C4820E"
-        : "#003262",
-      color: isDragging ? "#fff" : "#fff",
-      cursor: isDragDisabled ? "not-allowed" : "grab",
-
-      // styles we need to apply on draggables
-      ...draggableStyle,
-    };
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -217,109 +162,28 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
           fill
         >
           <Tab eventKey="emba" title="EMBA">
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <Droppable droppableId="rankings">
-                {(provided) => (
-                  <ListGroup
-                    className={classnames("rankings mb-4 w-100 text-start")}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {finalRankings["emba"].map(
-                      ({ displayValue, icon, disabled }, index) => {
-                        return (
-                          <Draggable
-                            key={displayValue}
-                            draggableId={displayValue}
-                            index={index}
-                            isDragDisabled={disabled}
-                          >
-                            {(provided, snapshot) => (
-                              <ListGroup.Item
-                                ref={provided.innerRef}
-                                {...provided.dragHandleProps}
-                                {...provided.draggableProps}
-                                style={getItemStyle(
-                                  snapshot.isDragging,
-                                  disabled,
-                                  provided.draggableProps.style
-                                )}
-                              >
-                                <i className={classnames(icon, "me-2")} />
-                                {displayValue}
-                                <Form.Check
-                                  onChange={handleCheckChange}
-                                  inline
-                                  reverse
-                                  type="checkbox"
-                                  id={displayValue}
-                                  className="float-end"
-                                />
-                              </ListGroup.Item>
-                            )}
-                          </Draggable>
-                        );
-                      }
-                    )}
-                    {provided.placeholder}
-                  </ListGroup>
-                )}
-              </Droppable>
-            </DragDropContext>
+            <DndTab
+              eventKey="emba"
+              selectedGroup={selectedGroup}
+              finalRankings={finalRankings}
+              updateFinalRankings={updateFinalRankings}
+            />
           </Tab>
-          <Tab eventKey="ft" title="Full-time MBA">
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <Droppable droppableId="rankings">
-                {(provided) => (
-                  <ListGroup
-                    className={classnames("rankings mb-4 w-100 text-start")}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {finalRankings["ft"].map(
-                      ({ displayValue, icon, disabled }, index) => {
-                        return (
-                          <Draggable
-                            key={displayValue}
-                            draggableId={displayValue}
-                            index={index}
-                            isDragDisabled={disabled}
-                          >
-                            {(provided, snapshot) => (
-                              <ListGroup.Item
-                                ref={provided.innerRef}
-                                {...provided.dragHandleProps}
-                                {...provided.draggableProps}
-                                style={getItemStyle(
-                                  snapshot.isDragging,
-                                  disabled,
-                                  provided.draggableProps.style
-                                )}
-                              >
-                                <i className={classnames(icon, "me-2")} />
-                                {displayValue}
-                                <Form.Check
-                                  onChange={handleCheckChange}
-                                  inline
-                                  reverse
-                                  type="checkbox"
-                                  id={displayValue}
-                                  className="float-end"
-                                />
-                              </ListGroup.Item>
-                            )}
-                          </Draggable>
-                        );
-                      }
-                    )}
-                    {provided.placeholder}
-                  </ListGroup>
-                )}
-              </Droppable>
-            </DragDropContext>
+          <Tab eventKey="ft" title="Fill-time MBA">
+            <DndTab
+              eventKey="ft"
+              selectedGroup={selectedGroup}
+              finalRankings={finalRankings}
+              updateFinalRankings={updateFinalRankings}
+            />
           </Tab>
         </Tabs>
       </Form.Group>
+      {/* TODO: idea. add a range slider that lets you adjust the granularity of your data */}
+      {/* <Form.Group className={classnames(styles.dnd, 'my-5')}>
+        <Form.Label>Use the slider to select the granularity of your data </Form.Label>
+        <Form.Range />
+      </Form.Group> */}
       <Form.Group className={styles.dnd}>
         <Form.Label>Input a number in either field</Form.Label>
         <Row>
