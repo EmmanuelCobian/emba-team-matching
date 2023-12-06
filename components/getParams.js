@@ -9,6 +9,15 @@ import classnames from "classnames";
 import DndTab from "./dndTab";
 import styles from "@/styles/GetParams.module.css";
 
+/**
+ * Component for configuring parameters before processing data
+ * 
+ * @param {number} dataLen - The length of the data
+ * @param {function} updateNumTeams - Function to update the number of teams
+ * @param {function} updateRankings - Function to update the user defined rankings
+ * @param {function} jumpTo - Function to navigate to another step in the team formation process
+ * @returns {JSX.Element} - The rendered component
+ */
 function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const rankings = {
     emba: [
@@ -112,18 +121,38 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
   const [numTeams, setNumTeams] = useState("");
   const [groupSize, setGroupSize] = useState("");
 
+  /**
+   * Update the final rankings state
+   * 
+   * @param {Object} ranks - The updated rankings
+   */
   const updateFinalRankings = (ranks) => setFinalRankings(ranks);
 
+  /**
+   * Handle input change for the number of teams
+   * 
+   * @param {Object} event - The input change event 
+   */
   const onNumTeamsInput = ({ target: { value } }) => {
     setNumTeams(value);
     setGroupSize(Math.ceil(dataLen / value));
   };
 
+  /**
+   * Handle input change for the group size
+   * 
+   * @param {Object} event - The input change event 
+   */
   const onGroupSizeInput = ({ target: { value } }) => {
     setGroupSize(value);
     setNumTeams(Math.ceil(dataLen / value));
   };
 
+  /**
+   * Handle form submission
+   * 
+   * @param {Object} e - The form submission event
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     let res = finalRankings[selectedGroup].filter((rank) => !rank.disabled);
@@ -132,6 +161,11 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
     jumpTo("process");
   };
 
+  /**
+   * @param {string} id - The unique id for the tooltip
+   * @param {ReactNode} children - The children elements
+   * @returns {JSX.Element} - The rendered component
+   */
   const Link = ({ id, children }) => (
     <OverlayTrigger
       overlay={
