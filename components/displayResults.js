@@ -6,7 +6,20 @@ import Tab from "react-bootstrap/Tab";
 import classnames from "classnames";
 import styles from "../styles/DisplayResults.module.css";
 
+/**
+ * Component for displaying team matching results and providing download options.
+ * 
+ * @param {Array} param0 - The input data containing team information
+ * @param {function} jumpTo - Function to navigate to another section
+ * @returns {JSX.Element} - The rendered component
+ */
 function DisplayResults({ inputData, jumpTo }) {
+  /**
+   * Download team matching results as a CSV file 
+   * 
+   * @param {Object} results - The team matching results
+   * @param {string} fileName - The name for the downloaded file
+   */
   function downloadResults(results, fileName) {
     dfd.toCSV(results, { fileName: fileName, download: true });
   }

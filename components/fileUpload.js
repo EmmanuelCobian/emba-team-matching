@@ -3,6 +3,13 @@ import classnames from "classnames";
 import { Container, Button } from "react-bootstrap";
 import styles from "@/styles/FileUpload.module.css";
 
+/**
+ * Component for uploading a CSV file and initializing the team matching process 
+ * 
+ * @param {function} updateInputData - Function to update the input data with the parsed CSV results
+ * @param {function} jumpTo - Function to navigate to another section
+ * @returns {JSX.Element} - The rendered component
+ */
 function FileUpload({ updateInputData, jumpTo }) {
   const { CSVReader } = useCSVReader();
   const config = { header: true };

@@ -5,6 +5,12 @@ import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import styles from "../styles/Layout.module.css";
 
+/**
+ * Layout component for the webpage
+ * 
+ * @param {React.ReactNode} param0 - The content to be displayed inside the layout
+ * @returns {JSX.Element} - The rendered element
+ */
 export default function Layout({ children }) {
   return (
     <>

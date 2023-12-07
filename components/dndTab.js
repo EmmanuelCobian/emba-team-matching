@@ -4,12 +4,27 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import classnames from "classnames";
 
-function DndTab({
+/**
+ * Component for handling drag-and-drop functionality within a department tab
+ * 
+ * @param {string} eventKey - The key id for the tab
+ * @param {string} selectedGroup - The currently selected department
+ * @param {Object} finalRankings - The final rankings state
+ * @param {function} updateFinalRankings - Function to update final rankings state
+ * @returns {JSX.Element} - The rendered component
+ */
+export default function DndTab({
   eventKey,
   selectedGroup,
   finalRankings,
   updateFinalRankings,
 }) {
+
+  /**
+   * Update whether rankings are disabled or not 
+   * 
+   * @param {Object} e - event object
+   */
   const handleCheckChange = (e) => {
     let rankTarget = e.target.id;
     let items = Array.from(finalRankings[selectedGroup]);
@@ -31,6 +46,11 @@ function DndTab({
     }
   };
 
+  /**
+   * Update the ordering of rankings after user finishes dragging them
+   * 
+   * @param {Object} result -  DragDropContext object
+   */
   const handleOnDragEnd = (result) => {
     if (!result.destination) {
       return;
@@ -45,6 +65,14 @@ function DndTab({
     }));
   };
 
+  /**
+   * Get or Update the style for the current DnD item
+   * 
+   * @param {boolean} isDragging - Boolean for whether the current draggable item is being dragged
+   * @param {boolean} isDragDisabled - Boolean for whether the current item has dragging disabled
+   * @param {Object} draggableStyle - Previous styles for this item
+   * @returns {Object} - The style for a particular DnD object
+   */
   const getItemStyle = (isDragging, isDragDisabled, draggableStyle) => {
     return {
       // some basic styles to make the items look a bit nicer
@@ -118,5 +146,3 @@ function DndTab({
     </DragDropContext>
   );
 }
-
-export default DndTab;

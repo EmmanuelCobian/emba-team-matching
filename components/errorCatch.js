@@ -3,6 +3,13 @@ import { Button, Row, Col } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import styles from "@/styles/ErrorCatch.module.css";
 
+/**
+ * Component for displaying error information and allowed types for a specific column
+ * 
+ * @param {function} jumpTo - Function to navigate to another section
+ * @param {string} category - The category of the error (column name)
+ * @returns {JSX.Element} - The rendered component
+ */
 function ErrorCatch({ jumpTo, category }) {
   let colName = category;
   let allowedTypes = "";
