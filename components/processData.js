@@ -24,8 +24,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 100;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 1;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -668,6 +668,7 @@ function ProcessData({
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
       let seed = Math.random();
+      // let seed = 0.9488740006144681;
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
