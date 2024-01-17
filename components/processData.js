@@ -25,7 +25,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 5000;
+  const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -177,7 +177,6 @@ function ProcessData({
    * 
    * @param {Array} team - List of labels for a team
    * @param {string} label - Name of label to look for duplicates
-   * @returns 
    */
   const getLabelDupes = (team, label) => {
     let teamSeries = new dfd.Series(team);
@@ -631,7 +630,7 @@ function ProcessData({
      * Given an iteration of assigning teams, keep the highest difference in scores between teams. The goal is to minimize the difference in scores between teams.
      * 
      * @param {Array} teams - List of team data
-     * @returns {}
+     * @returns {int} - The difference in scores between the two teams with the highest difference in scores
      */
     const scoreIteration = async (teams) => {
       let scores = [];
@@ -656,9 +655,10 @@ function ProcessData({
     };
 
     /**
+     * Compute one iteration of assigning teams based on the rankings. 
      * 
-     * @param {*} data 
-     * @returns 
+     * @param {dfd.DataFrame} data 
+     * @returns {Object} - The optimal teams for this run and the seed used to shuffle the data
      */
     const oneIteration = async (data) => {
       let teams = new Array(numTeams);
@@ -770,10 +770,10 @@ function ProcessData({
     };
 
     /**
+     * Runs nIterations number of iterations and returns the best teams from input data. Updates the state variables of the teams and triggers a rerender to display the teams
      * 
-     * @param {*} data 
-     * @param {*} nIterations 
-     * @returns 
+     * @param {dfd.DataFrame} data 
+     * @param {int} nIterations 
      */
     const findBestTeams = async (data, nIterations) => {
       try {
