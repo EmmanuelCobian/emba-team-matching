@@ -25,7 +25,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 1;
+  // const NUM_ITERATIONS = 1000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -578,7 +578,6 @@ function ProcessData({
             score += numVets * weight;
             break;
           case "PQT":
-            // let minLabel = findMinLabel("PQT", emba["PQT"].unique().values);
             let numMinLabel = team["PQT"].eq("T").sum();
             score += numMinLabel * weight;
             break;
