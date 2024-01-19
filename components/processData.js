@@ -4,13 +4,13 @@ import classnames from "classnames";
 import * as dfd from "danfojs";
 
 /**
- * Component that handles the computation of teams and displays a progress bar                
- * 
+ * Component that handles the computation of teams and displays a progress bar
+ *
  * @param {Object} inputData - The parsed CSV file represented as an Object
  * @param {number} numTeams - The number of teams
- * @param {Array} rankings - The rankings specified by the user 
- * @param {function} updateTeams - Function to update the teams once they've been finalized 
- * @param {function} jumpTo - Function to navigate to another section 
+ * @param {Array} rankings - The rankings specified by the user
+ * @param {function} updateTeams - Function to update the teams once they've been finalized
+ * @param {function} jumpTo - Function to navigate to another section
  * @param {function} catchError - Function to handle displaying any encountered errors
  * @returns  {JSX.Element} - The rendered component
  */
@@ -24,16 +24,16 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 1000;
+  // const NUM_ITERATIONS = 12500;
+  const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
   const [afterRender, setAfterRender] = useState(false);
 
   /**
-   * Generate normalized and exponentially decreasing weights 
-   * 
+   * Generate normalized and exponentially decreasing weights
+   *
    * @param {number} n - Number of weights
    * @returns {Array} - Weights
    */
@@ -56,7 +56,7 @@ function ProcessData({
 
   /**
    * Find the argmin of an array of numbers
-   * 
+   *
    * @param {Array} arr - Array you want to find the min arg for
    * @returns {number} - Index of min element
    */
@@ -66,7 +66,7 @@ function ProcessData({
 
   /**
    * Handle adding a row into a specific team number
-   * 
+   *
    * @param {dfd.DataFrame} data - The current team
    * @param {dfd.Series} row - The row you want to add to data
    * @param {number} teamNum - The team number
@@ -93,7 +93,7 @@ function ProcessData({
 
   /**
    * Find the element with the least number of entries in a column
-   * 
+   *
    * @param {string} col - Name of the column
    * @param {Array} uniqueVals - List of unique values in col
    * @returns {string} - Name of label that appears the least in col
@@ -112,8 +112,8 @@ function ProcessData({
   };
 
   /**
-   * Get the size of all the teams 
-   * 
+   * Get the size of all the teams
+   *
    * @param {Array} teams - List where each element is a DataFrame
    * @returns {Array} - List where each element, i, is the size of team i
    */
@@ -132,8 +132,8 @@ function ProcessData({
   };
 
   /**
-   * Get the number of times a certain value appears in each team 
-   * 
+   * Get the number of times a certain value appears in each team
+   *
    * @param {Array} teams - List where each element is a team
    * @param {string} colName - Name of column to search
    * @param {Array} colValOptions  - List of allowed values for this column
@@ -157,7 +157,7 @@ function ProcessData({
 
   /**
    * Get all the row labels from a specific column for each team
-   * 
+   *
    * @param {Array} teams - List where each element is a team
    * @param {string} colName - Name of column to search
    * @returns {Array} - List where each element contains a list labels
@@ -173,8 +173,8 @@ function ProcessData({
   };
 
   /**
-   * Get the number of duplicate label each team has 
-   * 
+   * Get the number of duplicate label each team has
+   *
    * @param {Array} team - List of labels for a team
    * @param {string} label - Name of label to look for duplicates
    */
@@ -186,7 +186,7 @@ function ProcessData({
 
   /**
    * Assign people to teams such that each team has at least minNum number of label
-   * 
+   *
    * @param {dfd.DataFrame} data - Remaining rows left to assign
    * @param {Array} teams - List where each element is a team
    * @param {string} col - Name of the column being assigned
@@ -207,20 +207,16 @@ function ProcessData({
         continue;
       }
 
-      let startIndex = teamIndex;
-      while (
-        numLabel[teamIndex] >= minNum ||
-        (teamSizes[teamIndex] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-
-        if (startIndex == teamIndex) {
-          minNum += 1;
-          teamIndex = argMin(numLabel);
+      if (numLabel.every((elm) => elm == minNum)) {
+        minNum += 1;
+      }
+      for (let j = 0; j < teams.length; j++) {
+        if (numLabel[j] < minNum && teamSizes[j] < MAX_TEAM_SIZE) {
+          teamIndex = j;
           break;
         }
       }
+
       teamSizes[teamIndex] += 1;
       numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
@@ -257,7 +253,7 @@ function ProcessData({
 
   /**
    * Assign all remaining people such that they're spread out by labels in col. Data will be empty after this function
-   * 
+   *
    * @param {dfd.DataFrame} data - Remaining rows left to assign
    * @param {Array} teams - List where each element is a team
    * @param {string} col - Name of the column we want to separate people by
@@ -277,7 +273,7 @@ function ProcessData({
       let teamIndex = 0;
       let minDupes = Infinity;
       let minDupeTeamSize = Infinity;
-      for (let index = 0; index < dupesPerTeam.length; index++) {
+      for (let index = 0; index < teams.length; index++) {
         let dupes = dupesPerTeam[index];
         let teamSize = teamSizes[index];
         if (
@@ -287,7 +283,7 @@ function ProcessData({
         ) {
           teamIndex = index;
           minDupes = dupes;
-          minDupeTeamSize = teamSizes[index];
+          minDupeTeamSize = teamSize;
         }
       }
 
@@ -305,7 +301,7 @@ function ProcessData({
 
   /**
    * Assign people to teams such that the label that appears the least in col is spread out evenly
-   * 
+   *
    * @param {dfd.DataFrame} data - Remaining rows left to assign
    * @param {Array} teams - List where each element is a team
    * @param {string} col - Name of the column being assigned
@@ -346,26 +342,23 @@ function ProcessData({
         continue;
       }
 
-      let startIndex = teamIndex;
-      while (
-        numLabel[teamIndex] >= minNumLabel ||
-        (containsEmpty && teams[teamIndex][col].values.includes(minLabel)) ||
-        (teamSizes[teamIndex] >= MAX_TEAM_SIZE &&
-          teams[teamIndex].count().values[0] > 0)
-      ) {
-        teamIndex = teamIndex + 1 < teams.length ? teamIndex + 1 : 0;
-        if (startIndex == teamIndex) {
-          let minFN = Infinity;
-          for (let j = 0; j < teams.length; j++) {
-            if (numLabel[j] < minFN && teamSizes[j] < MAX_TEAM_SIZE) {
-              minFN = numLabel[j];
-              teamIndex = j;
-            }
-          }
-          minNumLabel += 1;
+      let addedToTeam = false;
+      for (let j = 0; j < teams.length; j++) {
+        if (
+          numLabel[j] < minNumLabel &&
+          teamSizes[j] < MAX_TEAM_SIZE &&
+          (!containsEmpty || !teams[j][col].values.includes(minLabel))
+        ) {
+          teamIndex = j;
+          addedToTeam = true;
           break;
         }
       }
+
+      if (!addedToTeam) {
+        teamIndex = argMin(teamSizes);
+      }
+
       teamSizes[teamIndex] += 1;
       numLabel[teamIndex] += 1;
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
@@ -389,7 +382,7 @@ function ProcessData({
 
   /**
    * Validate that the data contains the right values given the rankings
-   * 
+   *
    * @param {dfd.DataFrame} data - Rows that were parsed from inputed CSV file
    */
   const dataValidation = (data) => {
@@ -531,7 +524,7 @@ function ProcessData({
 
   /**
    * Check to see if the Series of values only contains allowedValues
-   * 
+   *
    * @param {dfd.Series} values - Values from data
    * @param {Array} allowedValues - List of values that are allowed in this column
    * @param {string} category - The category we would label this error if one is ran into
@@ -548,8 +541,8 @@ function ProcessData({
 
   useEffect(() => {
     /**
-     * Give a team a score based on the rankings and weights associated with those rankings 
-     * 
+     * Give a team a score based on the rankings and weights associated with those rankings
+     *
      * @param {dfd.DataFrame} team - Data for a team
      * @returns {number} - The score for this team
      */
@@ -627,7 +620,7 @@ function ProcessData({
 
     /**
      * Given an iteration of assigning teams, keep the highest difference in scores between teams. The goal is to minimize the difference in scores between teams.
-     * 
+     *
      * @param {Array} teams - List of team data
      * @returns {int} - The difference in scores between the two teams with the highest difference in scores
      */
@@ -654,9 +647,9 @@ function ProcessData({
     };
 
     /**
-     * Compute one iteration of assigning teams based on the rankings. 
-     * 
-     * @param {dfd.DataFrame} data 
+     * Compute one iteration of assigning teams based on the rankings.
+     *
+     * @param {dfd.DataFrame} data
      * @returns {Object} - The optimal teams for this run and the seed used to shuffle the data
      */
     const oneIteration = async (data) => {
@@ -667,7 +660,7 @@ function ProcessData({
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
       let seed = Math.random();
-      // let seed = 0.9488740006144681;
+      // let seed = 0.8590595539435977
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
@@ -771,9 +764,9 @@ function ProcessData({
 
     /**
      * Runs nIterations number of iterations and returns the best teams from input data. Updates the state variables of the teams and triggers a rerender to display the teams
-     * 
-     * @param {dfd.DataFrame} data 
-     * @param {int} nIterations 
+     *
+     * @param {dfd.DataFrame} data
+     * @param {int} nIterations
      */
     const findBestTeams = async (data, nIterations) => {
       try {
