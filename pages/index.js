@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <Layout>
       <Head>
-        <title>Team Matching</title>
+        <title>Haas Team Matching</title>
       </Head>
 
       <section id="home" className={styles.home}>
@@ -125,19 +125,19 @@ export default function Home() {
           <Accordion className="mt-3">
             <Accordion.Item eventKey="0">
               <Accordion.Header>
-                <span className="fw-semibold">
+                <span className="fw-medium">
                   How long does the process take to complete?
                 </span>
               </Accordion.Header>
               <Accordion.Body>
                 Depending on the size of your data, this process could take
-                anywhere from 4-10 minutes. Feel free to leave this window in
+                anywhere from 5-20 minutes. For example, if your input data has size ~150, you could expect the process to last closer to 20 minutes. On the other hand, if your input data has size ~50 then it will take around 4-5 minutes. Feel free to leave this window in
                 the background while it's working.
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>
-                <span className="fw-semibold">How does the algorithm work?</span>
+                <span className="fw-medium">How does the algorithm work?</span>
               </Accordion.Header>
               <Accordion.Body>
                 This program uses an approximation algorithm that iteratively
@@ -149,7 +149,7 @@ export default function Home() {
             </Accordion.Item>
             <Accordion.Item eventKey="2">
               <Accordion.Header>
-                <span className="fw-semibold">
+                <span className="fw-medium">
                   Is any of my data stored or linked to me?
                 </span>
               </Accordion.Header>
@@ -161,7 +161,7 @@ export default function Home() {
             </Accordion.Item>
             <Accordion.Item eventKey="3">
               <Accordion.Header>
-                <span className="fw-semibold">
+                <span className="fw-medium">
                   What does my input file need to look like?
                 </span>
               </Accordion.Header>
