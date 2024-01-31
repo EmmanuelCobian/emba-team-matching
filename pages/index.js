@@ -8,6 +8,11 @@ import styles from "../styles/Home.module.css";
 import Layout from "../components/layout";
 import Master from "../components/master";
 
+/**
+ * Home page 
+ * 
+ * @returns {JSX.Element} - The rendered element
+ */
 export default function Home() {
   return (
     <Layout>
