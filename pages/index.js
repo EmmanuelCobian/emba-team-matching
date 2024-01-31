@@ -135,8 +135,8 @@ export default function Home() {
                 </span>
               </Accordion.Header>
               <Accordion.Body>
-                Depending on the size of your data, this process could take
-                anywhere from 5-20 minutes. For example, if your input data has size ~150, you could expect the process to last closer to 20 minutes. On the other hand, if your input data has size ~50 then it will take around 4-5 minutes. Feel free to leave this window in
+                Depending on the size of your data and the machine you use, this process could take
+                anywhere from 5-20 minutes. For example, if your input data has size ~50 then it will take around 4-5 minutes. On the other hand, if your input data has size ~150, you could expect the process to last closer to 20 minutes. Feel free to leave this window in
                 the background while it's working.
               </Accordion.Body>
             </Accordion.Item>
@@ -160,7 +160,7 @@ export default function Home() {
               </Accordion.Header>
               <Accordion.Body>
                 This program doesn't store or link any of your data. The results
-                you get are also anonymous since running this program on the
+                are also anonymous because running this program on the
                 same data multiple times will always render a different result.
               </Accordion.Body>
             </Accordion.Item>
