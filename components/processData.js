@@ -24,8 +24,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 100;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 1;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -627,20 +627,14 @@ function ProcessData({
     const scoreIteration = async (teams) => {
       let scores = [];
       teams.map((team) => scores.push(scoreOneTeam(team)));
-      let allCombs = scores.map(function (item, i, arr) {
-        var tmp = arr.map(function (_item) {
-          if (item != _item) return [item, _item];
-        });
-        return tmp.splice(tmp.indexOf(undefined), 1), tmp;
-      });
-      let scorePairs = [];
-      for (let i = 0; i < allCombs.length; i++) {
-        let pair = allCombs[i];
-        if (!pair.includes(undefined)) {
-          scorePairs = pair;
-          break;
+      let scoreCombos = [];
+      for (let i = 1; i < scores.length; i++) {
+        let score = scores[i]
+        if (score != scores[0]) {
+          scoreCombos.push([scores[0], score])
         }
       }
+      let scorePairs = scoreCombos.length == 0 ? [scores[0], scores[0]] : scoreCombos;
       let differences = scorePairs.map((pair) => Math.abs(pair[0] - pair[1]));
       let result = Math.max(...differences);
       return result;
@@ -660,7 +654,7 @@ function ProcessData({
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
       let seed = Math.random();
-      // let seed = 0.8590595539435977
+      // let seed = 0.8960922433920508
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
