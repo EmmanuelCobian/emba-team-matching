@@ -203,7 +203,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
               updateFinalRankings={updateFinalRankings}
             />
           </Tab>
-          <Tab eventKey="ft" title="Fill-time MBA">
+          <Tab eventKey="ft" title="Full-time MBA">
             <DndTab
               eventKey="ft"
               selectedGroup={selectedGroup}
