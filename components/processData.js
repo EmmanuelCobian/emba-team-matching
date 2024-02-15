@@ -25,7 +25,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 1250;
+  // const NUM_ITERATIONS = 2000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -571,12 +571,19 @@ function ProcessData({
             score += numVets * weight;
             break;
           case "PQT":
-            let numMinLabel = team["PQT"].eq("T").sum();
+            let numQs = team["PQT"].eq("Q").sum();
+            let numPs = team["PQT"].eq("P").sum();
+            let numTs = team["PQT"].eq("T").sum();
+            let numMinLabel = Math.abs(numQs - numPs) + Math.abs(numQs - numTs) + Math.abs(numPs - numTs);
             score += numMinLabel * weight;
             break;
           case "UR":
             let numUR = team["UR"].eq("Underrepresented").sum();
-            score += numUR * weight;
+            if (numUR === 1) {
+              score -= weight; // Subtract weight if there's only 1 underrepresented
+            } else {
+              score += numUR * weight; // Add weight for 0, 2, or more than 2 underrepresented
+            }
             break;
           case "Ethnicity":
             let numUniqueEth = team["Ethnicity"].nUnique();
