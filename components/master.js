@@ -63,7 +63,8 @@ export default function Master() {
   const jumpTo = (nextStage) => setStep(nextStage);
 
   /**
-   *
+   * Catch an error and navigate to the corresponding error state
+   * 
    * @param {string} nextStage - The next state to navigate to (error state)
    * @param {string} error - The error message
    */
