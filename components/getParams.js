@@ -81,7 +81,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
       {
         displayValue: "School Major",
         colLabel: "UG School Major",
-        icon: "bi bi-laptop",
+        icon: "bi bi-award",
         disabled: false,
       },
       {
@@ -111,7 +111,112 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
       {
         displayValue: "Ethnicity",
         colLabel: "Ethnicity",
-        icon: "bi bi-flag",
+        icon: "bi bi-fingerprint",
+        disabled: false,
+      },
+      {
+        displayValue: "Function",
+        colLabel: "Function",
+        icon: "bi bi-laptop",
+        disabled: false,
+      },
+      {
+        displayValue: "UG School Country",
+        colLabel: "UG School Country",
+        icon: "bi bi-geo-alt",
+        disabled: false,
+      },
+      {
+        displayValue: "Primary Citizenship",
+        colLabel: "Primary Citizenship",
+        icon: "bi bi-person-vcard",
+        disabled: false,
+      },
+    ],
+
+    ew: [
+      {
+        displayValue: "Gender",
+        colLabel: "Gender",
+        icon: "bi bi-gender-ambiguous",
+        disabled: false,
+      },
+      {
+        displayValue: "Citizenship Status",
+        colLabel: "Citizenship Status",
+        icon: "bi bi-globe-americas",
+        disabled: false,
+      },
+      {
+        displayValue: "PQT",
+        colLabel: "PQT",
+        icon: "bi bi-briefcase",
+        disabled: false,
+      },
+      {
+        displayValue: "Underrepresented",
+        colLabel: "UR",
+        icon: "bi bi-people",
+        disabled: false,
+      },
+      {
+        displayValue: "School Major",
+        colLabel: "UG School Major",
+        icon: "bi bi-award",
+        disabled: false,
+      },
+      {
+        displayValue: "Industry",
+        colLabel: "Industry",
+        icon: "bi bi-graph-up",
+        disabled: false,
+      },
+      {
+        displayValue: "Military Status",
+        colLabel: "Military Status",
+        icon: "bi bi-wrench",
+        disabled: false,
+      },
+      {
+        displayValue: "School Name",
+        colLabel: "UG School Name",
+        icon: "bi bi-mortarboard",
+        disabled: false,
+      },
+      {
+        displayValue: "Employer",
+        colLabel: "Employer",
+        icon: "bi bi-person-badge",
+        disabled: false,
+      },
+      {
+        displayValue: "Ethnicity",
+        colLabel: "Ethnicity",
+        icon: "bi bi-fingerprint",
+        disabled: false,
+      },
+      {
+        displayValue: "Function",
+        colLabel: "Function",
+        icon: "bi bi-laptop",
+        disabled: false,
+      },
+      {
+        displayValue: "UG School Country",
+        colLabel: "UG School Country",
+        icon: "bi bi-geo-alt",
+        disabled: false,
+      },
+      {
+        displayValue: "Primary Citizenship",
+        colLabel: "Primary Citizenship",
+        icon: "bi bi-person-vcard",
+        disabled: false,
+      },
+      {
+        displayValue: "Time Zone",
+        colLabel: "Time Zone",
+        icon: "bi bi-clock-history",
         disabled: false,
       },
     ],
@@ -211,13 +316,16 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
               updateFinalRankings={updateFinalRankings}
             />
           </Tab>
+          <Tab eventKey="ew" title="Evening / Weekends">
+            <DndTab 
+              eventKey="ew"
+              selectedGroup={selectedGroup}
+              finalRankings={finalRankings}
+              updateFinalRankings={updateFinalRankings}
+            />
+          </Tab>
         </Tabs>
       </Form.Group>
-      {/* TODO: idea. add a range slider that lets you adjust the granularity of your data */}
-      {/* <Form.Group className={classnames(styles.dnd, 'my-5')}>
-        <Form.Label>Use the slider to select the granularity of your data </Form.Label>
-        <Form.Range />
-      </Form.Group> */}
       <Form.Group className={styles.dnd}>
         <Form.Label>Input a number in either field</Form.Label>
         <Row>
