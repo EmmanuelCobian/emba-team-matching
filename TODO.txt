@@ -1,0 +1,21 @@
+1. Add new gender criteria, ex: nonbinary 
+
+DONE
+2. Add EW tab
+
+3. Change gender to be min 3 instead of min 2 -> some teams won't have women. 
+    When numWomen % 3 != 0, put into teams of 2 instead
+
+4. Create new EW criteria
+    -> Time Zone
+    -> Function 
+    -> UG School Country 
+    -> Primary Citizenship
+
+DONE    
+5. Create new FT criteria
+    -> Function 
+    -> UG School Country 
+    -> Primary Citizenship
+
+6. add new criteria to the documentation page 

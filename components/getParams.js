@@ -26,6 +26,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         colLabel: "Gender",
         icon: "bi bi-gender-ambiguous",
         disabled: false,
+        variant: 2,
       },
       {
         displayValue: "Military Status",
@@ -59,6 +60,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         colLabel: "Gender",
         icon: "bi bi-gender-ambiguous",
         disabled: false,
+        variant: 2,
       },
       {
         displayValue: "Citizenship Status",
@@ -140,6 +142,7 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         colLabel: "Gender",
         icon: "bi bi-gender-ambiguous",
         disabled: false,
+        variant: 3,
       },
       {
         displayValue: "Citizenship Status",

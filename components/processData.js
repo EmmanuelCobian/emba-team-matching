@@ -24,8 +24,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 2000;
+  // const NUM_ITERATIONS = 12500;
+  const NUM_ITERATIONS = 2000;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -190,20 +190,21 @@ function ProcessData({
    * @param {dfd.DataFrame} data - Remaining rows left to assign
    * @param {Array} teams - List where each element is a team
    * @param {string} col - Name of the column being assigned
-   * @param {string} label - Name of the label we want a minimum number of
+   * @param {Array} labels - Name(s) of the label(s) we want a minimum number of
    * @param {number} minNum - Lower-bound for number of label per team
    * @returns {Object} - Remaining rows to assign and updated teams
    */
-  const minDistributeAssign = (data, teams, col, label, minNum) => {
+  const minDistributeAssign = (data, teams, col, labels, minNum) => {
     let teamIndex = 0;
-    let numLabel = getNumLabelPerTeam(teams, col, [label]);
+    let numLabel = getNumLabelPerTeam(teams, col, labels);
     let teamSizes = getTeamSizes(teams);
-    let numRows = data.shape[0];
     data = data.resetIndex();
+    // let filtered = data.query(data[col].eq(labels, {axis: 1}));
+    let numRows = data.shape[0];
 
     for (let i = 0; i < numRows; i++) {
       let row = data.loc({ rows: [i] });
-      if (row[col].iat(0) != label) {
+      if (!labels.includes(row[col].iat(0))) {
         continue;
       }
 
@@ -223,31 +224,8 @@ function ProcessData({
       data = data.drop({ index: [i] });
     }
 
-    // TODO: fix this to handle larger input sizes
-    if (numLabel[teamIndex] == 1) {
-      let lastPersonAdded = teams[teamIndex].iloc({
-        rows: [teamSizes[teamIndex] - 1],
-      });
-      teams[teamIndex] = teams[teamIndex].drop({
-        index: [teamSizes[teamIndex] - 1],
-      });
-      numLabel[teamIndex] -= 1;
-
-      let nWomenFilter = [];
-      for (let i = 0; i < teams.length; i++) {
-        if (numLabel[i] >= minNum) {
-          nWomenFilter.push(Infinity);
-        } else {
-          nWomenFilter.push(numLabel[i]);
-        }
-      }
-      teamIndex = argMin(nWomenFilter);
-      teams[teamIndex] = handleAppend(
-        teams[teamIndex],
-        lastPersonAdded,
-        teamIndex + 1
-      );
-    }
+    // TODO: handle the case where sum(numLabel) % minNum != 0
+    
     return { data: data, teams: teams };
   };
 
@@ -500,6 +478,38 @@ function ProcessData({
       }
     }
 
+    // validate function column 
+    if (ranks.includes("Function")) {
+      if (!data.columns.includes("Function")) {
+        catchError("error", "Function");
+        throw new Error("function error");
+      }
+    }
+
+    // validate UG School Country 
+    if (ranks.includes("UG School Country")) {
+      if (!data.columns.includes("UG School Country")) {
+        catchError("error", "UG School Country");
+        throw new Error("ug school country error");
+      }
+    }
+
+    // validate primary citizenship column 
+    if (ranks.includes("Primary Citizenship")) {
+      if (!data.columns.includes("Primary Citizenship")) {
+        catchError("error", "Primary Citizenship");
+        throw new Error("primary citizenship error");
+      }
+    }
+
+    // validate time zone column
+    if (ranks.includes("Time Zone")) {
+      if (!data.columns.includes("Time Zone")) {
+        catchError("error", "Time Zone");
+        throw new Error("time zone error");
+      }
+    }
+
     //validate age column
     if (ranks.includes("Age")) {
       if (!data.columns.includes("Age")) {
@@ -669,20 +679,32 @@ function ProcessData({
         let allowedValues;
         switch (rank) {
           case "Gender":
-            ongoing = minDistributeAssign(
-              ongoing.data,
-              ongoing.teams,
-              "Gender",
-              "Woman",
-              2
-            );
+            let variant = rankings[i].variant;
+            let womenLabels = ['Woman']
+            if (variant == 2) {
+              ongoing = minDistributeAssign(
+                ongoing.data,
+                ongoing.teams,
+                "Gender",
+                womenLabels,
+                2
+              );
+            } else if (variant == 3) {
+              ongoing = minDistributeAssign(
+                ongoing.data, 
+                ongoing.teams,
+                "Gender",
+                womenLabels,
+                3
+              );
+            }
             break;
           case "UR":
             ongoing = minDistributeAssign(
               ongoing.data,
               ongoing.teams,
               "UR",
-              "Underrepresented",
+              ["Underrepresented"],
               2
             );
             break;
@@ -714,6 +736,17 @@ function ProcessData({
               ongoing.data,
               ongoing.teams,
               "PQT",
+              allowedValues,
+              false,
+              []
+            );
+            break;
+          case "Primary Citizenship":
+            allowedValues = shuffledData["Primary Citizenship"].unique();
+            ongoing = distributeMinLabelAssign(
+              ongoing.data, 
+              ongoing.teams, 
+              "Primary Citizenship",
               allowedValues,
               false,
               []
@@ -753,6 +786,22 @@ function ProcessData({
               ongoing.teams,
               "Ethnicity"
             );
+            break;
+          case "Function":
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Function"
+            );
+            break;
+          case "UG School Country":
+            ongoing = fillRemainingAssign(
+              ongoing.data,
+              ongoing.teams,
+              "UG School Country"
+            );
+            break;
+          case "Time Zone":
             break;
           default:
             ongoing = ongoing;
