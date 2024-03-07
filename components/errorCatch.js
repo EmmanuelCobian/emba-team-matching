@@ -19,9 +19,11 @@ function ErrorCatch({ jumpTo, category }) {
         <Row>
           <Col>
             <li>Woman</li>
+            <li>Nonbinary</li>
           </Col>
           <Col>
             <li>Man</li>
+            <li>Decline to State</li>
           </Col>
         </Row>
       );
@@ -78,7 +80,34 @@ function ErrorCatch({ jumpTo, category }) {
         </Row>
       );
       break;
+    case "UG School Country":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "Employer":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
+    case "Function":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      );
+      break;
+    case "Timezone":
       allowedTypes = (
         <Row>
           <Col>

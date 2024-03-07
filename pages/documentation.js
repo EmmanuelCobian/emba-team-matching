@@ -10,9 +10,11 @@ export default function Instructions() {
         <Row>
           <Col>
             <li>Woman</li>
+            <li>Nonbinary</li>
           </Col>
           <Col>
             <li>Man</li>
+            <li>Decline to State</li>
           </Col>
         </Row>
       ),
@@ -146,7 +148,37 @@ export default function Instructions() {
       ),
     },
     {
+      name: "UG School Country",
+      allowed: (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      ),
+    },
+    {
       name: "Employer",
+      allowed: (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      ),
+    },
+    {
+      name: "Function",
+      allowed: (
+        <Row>
+          <Col>
+            <li>Any non-numerical value</li>
+          </Col>
+        </Row>
+      ),
+    },
+    {
+      name: "Timezone",
       allowed: (
         <Row>
           <Col>
