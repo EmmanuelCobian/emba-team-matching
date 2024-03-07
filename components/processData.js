@@ -65,6 +65,18 @@ function ProcessData({
   };
 
   /**
+   * Assert that conition is true, otherwise throw an error
+   * 
+   * @param {boolean} condition 
+   * @param {string} message 
+   */
+  const assert = (condition, message) => {
+    if (!condition) {
+      throw new Error(message || "Assertion failed");
+    }
+  }
+
+  /**
    * Handle adding a row into a specific team number
    *
    * @param {dfd.DataFrame} data - The current team
@@ -225,6 +237,10 @@ function ProcessData({
     }
 
     // TODO: handle the case where sum(numLabel) % minNum != 0
+    let sumNumLabel = numLabel.reduce((partial, elm) => partial + elm, 0);
+    if (sumNumLabel % minNum != 0 && teams.length < (sumNumLabel / minNum)) {
+      console.log("sum(numLabel) % minNum != 0");
+    }
     
     return { data: data, teams: teams };
   };
@@ -375,7 +391,7 @@ function ProcessData({
         throw new Error("gender error");
       }
       uniqueValues = data["Gender"].unique();
-      allowedValues = ["Man", "Woman"];
+      allowedValues = ["Man", "Woman", "Nonbinary", "Decline to State", "Transgender Woman/Trans Woman", "Transgender Male/Trans Man", "Genderqueer/Gender Non-Conforming", "Different Identity", "Decline to State"];
       checkValues(uniqueValues, allowedValues, "Gender");
     }
 
@@ -502,11 +518,11 @@ function ProcessData({
       }
     }
 
-    // validate time zone column
-    if (ranks.includes("Time Zone")) {
-      if (!data.columns.includes("Time Zone")) {
-        catchError("error", "Time Zone");
-        throw new Error("time zone error");
+    // validate Timezone column
+    if (ranks.includes("Timezone")) {
+      if (!data.columns.includes("Timezone")) {
+        catchError("error", "Timezone");
+        throw new Error("Timezone error");
       }
     }
 
@@ -680,7 +696,7 @@ function ProcessData({
         switch (rank) {
           case "Gender":
             let variant = rankings[i].variant;
-            let womenLabels = ['Woman']
+            let womenLabels = ['Woman', 'Transgender Woman/Trans Woman']
             if (variant == 2) {
               ongoing = minDistributeAssign(
                 ongoing.data,
@@ -801,7 +817,7 @@ function ProcessData({
               "UG School Country"
             );
             break;
-          case "Time Zone":
+          case "Timezone":
             break;
           default:
             ongoing = ongoing;
@@ -809,6 +825,10 @@ function ProcessData({
         }
       }
       // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
+      assert(ongoing.data.shape[0] == 0, "Data not fully assigned");
+      let teamSizes = getTeamSizes(ongoing.teams);
+      assert(teamSizes.every((size) => size <= MAX_TEAM_SIZE), "Team size too large");
+      assert(teamSizes.reduce((partial, size) => partial + size, 0) == shuffledData.shape[0], "Data not fully assigned");
       return { teams: ongoing.teams, seed: seed };
     };
 

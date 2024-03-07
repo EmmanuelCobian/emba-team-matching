@@ -217,8 +217,8 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         disabled: false,
       },
       {
-        displayValue: "Time Zone",
-        colLabel: "Time Zone",
+        displayValue: "Timezone",
+        colLabel: "Timezone",
         icon: "bi bi-clock-history",
         disabled: false,
       },
