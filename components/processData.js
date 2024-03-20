@@ -25,7 +25,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 2000;
+  const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -211,7 +211,6 @@ function ProcessData({
     let numLabel = getNumLabelPerTeam(teams, col, labels);
     let teamSizes = getTeamSizes(teams);
     data = data.resetIndex();
-    // let filtered = data.query(data[col].eq(labels, {axis: 1}));
     let numRows = data.shape[0];
 
     for (let i = 0; i < numRows; i++) {
@@ -241,7 +240,7 @@ function ProcessData({
     if (sumNumLabel % minNum != 0 && teams.length < (sumNumLabel / minNum)) {
       console.log("sum(numLabel) % minNum != 0");
     }
-    
+
     return { data: data, teams: teams };
   };
 
@@ -373,6 +372,46 @@ function ProcessData({
       return { data: data, teams: teams };
     }
   };
+
+  /**
+   * Assign all remaining people such that each team has at most maxNum different values in col
+   * 
+   * @param {dfd.DataFrame} data - Remaining rows left to assign
+   * @param {Array} teams - List where each element is a team
+   * @param {string} col - Name of the column we want to separate people by
+   * @param {int} maxNum - Upper-bound for number of unique values per team
+   * @returns {Object} - Remaining rows to assign and updated teams
+   */
+  const assignNoMoreThan = (data, teams, col, maxNum) => {
+    let teamLabels = getAggLabelPerTeam(teams, col);
+    let uniqueLabels = teamLabels.map((team) => [...new Set(team)]);
+    let teamSizes = getTeamSizes(teams);
+    let numRows = data.shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      let label = row[col].iat(0);
+
+      let teamIndex = 0; 
+      for (let j = 0; j < teams.length; j++) {
+        let uniqueLabelsSize = uniqueLabels[j].length;
+        if ((uniqueLabelsSize == 0) || (uniqueLabelsSize < maxNum && teamSizes[j] < MAX_TEAM_SIZE)) {
+          teamIndex = j;
+        }
+      }
+
+    teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+    teamSizes[teamIndex] += 1;
+    teamLabels[teamIndex] =
+      teamLabels[teamIndex][0] == null
+        ? [label]
+        : teamLabels[teamIndex].concat([label]);
+    data = data.drop({ index: [i] });
+    }
+    return { data: data, teams: teams };
+  };
+
 
   /**
    * Validate that the data contains the right values given the rankings
@@ -596,6 +635,14 @@ function ProcessData({
             }
             score += numVets * weight;
             break;
+          case "Timezone":
+            let numUniqueTZ = team["Timezone"].nUnique();
+            // give penalty for having more than 2 unique timezones
+            if (numUniqueTZ > 2) {
+              numUniqueTZ = -2 * numUniqueTZ;
+            }
+            score += numUniqueTZ * weight;
+            break;
           case "PQT":
             let numQs = team["PQT"].eq("Q").sum();
             let numPs = team["PQT"].eq("P").sum();
@@ -623,9 +670,17 @@ function ProcessData({
             let numUniqueMajor = team["UG School Major"].nUnique();
             score += numUniqueMajor * weight;
             break;
+          case "UG School Country":
+            let numUniqueCountry = team["UG School Country"].nUnique();
+            score += numUniqueCountry * weight;
+            break;
           case "Employer":
             let numDiffEmployers = team["Employer"].nUnique();
             score += numDiffEmployers * weight;
+            break;
+          case "Function":
+            let numDiffFunctions = team["Function"].nUnique();
+            score += numDiffFunctions * weight;
             break;
           case "Citizenship Status":
             let numInternationals = team["Citizenship Status"].eq("FN").sum();
@@ -707,7 +762,7 @@ function ProcessData({
               );
             } else if (variant == 3) {
               ongoing = minDistributeAssign(
-                ongoing.data, 
+                ongoing.data,
                 ongoing.teams,
                 "Gender",
                 womenLabels,
@@ -760,8 +815,8 @@ function ProcessData({
           case "Primary Citizenship":
             allowedValues = shuffledData["Primary Citizenship"].unique();
             ongoing = distributeMinLabelAssign(
-              ongoing.data, 
-              ongoing.teams, 
+              ongoing.data,
+              ongoing.teams,
               "Primary Citizenship",
               allowedValues,
               false,
@@ -818,6 +873,7 @@ function ProcessData({
             );
             break;
           case "Timezone":
+            ongoing = assignNoMoreThan(ongoing.data, ongoing.teams, "Timezone", 2);
             break;
           default:
             ongoing = ongoing;
