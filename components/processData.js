@@ -178,6 +178,9 @@ function ProcessData({
     let result = [];
     for (let i = 0; i < teams.length; i++) {
       let values = teams[i][colName].values;
+      if (values.length == 1 && values[0] == null) {
+        values = [];
+      }
       result.push(values);
     }
 
@@ -285,10 +288,7 @@ function ProcessData({
 
       teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
       teamSizes[teamIndex] += 1;
-      teamLabels[teamIndex] =
-        teamLabels[teamIndex][0] == null
-          ? [label]
-          : teamLabels[teamIndex].concat([label]);
+      teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
       data = data.drop({ index: [i] });
     }
 
@@ -387,7 +387,7 @@ function ProcessData({
    */
   const assignNoMoreThan = (data, teams, col, maxNum) => {
     let teamLabels = getAggLabelPerTeam(teams, col);
-    let uniqueLabels = teamLabels.map((team) => [...new Set(team)]);
+    let uniqueLabels = teamLabels.map((team) => new Set(team));
     let teamSizes = getTeamSizes(teams);
     let numRows = data.shape[0];
     data = data.resetIndex();
@@ -401,18 +401,17 @@ function ProcessData({
 
       let teamIndex = 0; 
       for (let j = 0; j < teams.length; j++) {
-        let uniqueLabelsSize = uniqueLabels[j].length;
-        if ((uniqueLabelsSize == 0) || (uniqueLabelsSize < maxNum && teamSizes[j] < MAX_TEAM_SIZE)) {
+        let uniqueLabelsSize = uniqueLabels[j].size;
+        if ((uniqueLabels[j].has(label) || (!uniqueLabels[j].has(label) && uniqueLabelsSize < maxNum)) && teamSizes[j] < MAX_TEAM_SIZE) {
           teamIndex = j;
+          break;
         }
       }
 
     teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
     teamSizes[teamIndex] += 1;
-    teamLabels[teamIndex] =
-      teamLabels[teamIndex][0] == null
-        ? [label]
-        : teamLabels[teamIndex].concat([label]);
+    uniqueLabels[teamIndex].add(label)
+    teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
     data = data.drop({ index: [i] });
     }
     return { data: data, teams: teams };
