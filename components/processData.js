@@ -25,7 +25,7 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 100;
+  const NUM_ITERATIONS = 1;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -177,8 +177,8 @@ function ProcessData({
   const getAggLabelPerTeam = (teams, colName) => {
     let result = [];
     for (let i = 0; i < teams.length; i++) {
-      let industries = teams[i][colName].values;
-      result.push(industries);
+      let values = teams[i][colName].values;
+      result.push(values);
     }
 
     return result;
@@ -261,6 +261,9 @@ function ProcessData({
     for (let i = 0; i < numRows; i++) {
       let row = data.loc({ rows: [i] });
       let label = row[col].iat(0);
+      if (label == "") {
+        continue;
+      }
 
       let dupesPerTeam = teamLabels.map((team) => getLabelDupes(team, label));
       let teamIndex = 0;
@@ -392,6 +395,9 @@ function ProcessData({
     for (let i = 0; i < numRows; i++) {
       let row = data.loc({ rows: [i] });
       let label = row[col].iat(0);
+      if (label == "") {
+        continue;
+      }
 
       let teamIndex = 0; 
       for (let j = 0; j < teams.length; j++) {
@@ -411,6 +417,22 @@ function ProcessData({
     }
     return { data: data, teams: teams };
   };
+
+  const assignRemaining = (data, teams) => {
+    let teamSizes = getTeamSizes(teams);
+    let numRows = data.shape[0];
+    data = data.resetIndex();
+
+    for (let i = 0; i < numRows; i++) {
+      let row = data.loc({ rows: [i] });
+      let teamIndex = argMin(teamSizes);
+      teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
+      teamSizes[teamIndex] += 1;
+      data = data.drop({ index: [i] });
+    }
+
+    return { data: data, teams: teams };
+  }
 
 
   /**
@@ -880,7 +902,10 @@ function ProcessData({
             break;
         }
       }
-      // TODO: Need to handle the case where labels are disabled and teams aren't assigned fully (ex: industry is disabled)
+
+      if (ongoing.data.shape[0] != 0) {
+        ongoing = assignRemaining(ongoing.data, ongoing.teams);
+      }
       assert(ongoing.data.shape[0] == 0, "Data not fully assigned");
       let teamSizes = getTeamSizes(ongoing.teams);
       assert(teamSizes.every((size) => size <= MAX_TEAM_SIZE), "Team size too large");
