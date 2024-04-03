@@ -24,8 +24,8 @@ function ProcessData({
 }) {
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
-  // const NUM_ITERATIONS = 12500;
-  const NUM_ITERATIONS = 1;
+  const NUM_ITERATIONS = 12500;
+  // const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -417,6 +417,13 @@ function ProcessData({
     return { data: data, teams: teams };
   };
 
+  /**
+   * Assign all remaining people to teams 
+   * 
+   * @param {dfd.DataFrame} data - Remaining rows left to assign
+   * @param {Array} teams - List where each element is a team
+   * @returns {Object} - Remaining rows to assign and updated teams. Remaining rows should be empty
+   */
   const assignRemaining = (data, teams) => {
     let teamSizes = getTeamSizes(teams);
     let numRows = data.shape[0];
@@ -432,7 +439,6 @@ function ProcessData({
 
     return { data: data, teams: teams };
   }
-
 
   /**
    * Validate that the data contains the right values given the rankings
@@ -907,6 +913,11 @@ function ProcessData({
       }
       assert(ongoing.data.shape[0] == 0, "Data not fully assigned");
       let teamSizes = getTeamSizes(ongoing.teams);
+      for (let i = 0; i < teamSizes.length; i++) {
+        if (teamSizes[i] > MAX_TEAM_SIZE) {
+          console.log("Team size too large", teamSizes[i]);
+        }
+      }
       assert(teamSizes.every((size) => size <= MAX_TEAM_SIZE), "Team size too large");
       assert(teamSizes.reduce((partial, size) => partial + size, 0) == shuffledData.shape[0], "Data not fully assigned");
       return { teams: ongoing.teams, seed: seed };
