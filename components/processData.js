@@ -399,7 +399,7 @@ function ProcessData({
         continue;
       }
 
-      let teamIndex = 0; 
+      let teamIndex = null; 
       for (let j = 0; j < teams.length; j++) {
         let uniqueLabelsSize = uniqueLabels[j].size;
         if ((uniqueLabels[j].has(label) || (!uniqueLabels[j].has(label) && uniqueLabelsSize < maxNum)) && teamSizes[j] < MAX_TEAM_SIZE) {
@@ -408,12 +408,15 @@ function ProcessData({
         }
       }
 
+    if (teamIndex == null) {
+      teamIndex = argMin(teamSizes);
+    }
     teams[teamIndex] = handleAppend(teams[teamIndex], row, teamIndex + 1);
     teamSizes[teamIndex] += 1;
     uniqueLabels[teamIndex].add(label)
-    teamLabels[teamIndex] = teamLabels[teamIndex].concat([label]);
     data = data.drop({ index: [i] });
     }
+
     return { data: data, teams: teams };
   };
 
@@ -913,11 +916,6 @@ function ProcessData({
       }
       assert(ongoing.data.shape[0] == 0, "Data not fully assigned");
       let teamSizes = getTeamSizes(ongoing.teams);
-      for (let i = 0; i < teamSizes.length; i++) {
-        if (teamSizes[i] > MAX_TEAM_SIZE) {
-          console.log("Team size too large", teamSizes[i]);
-        }
-      }
       assert(teamSizes.every((size) => size <= MAX_TEAM_SIZE), "Team size too large");
       assert(teamSizes.reduce((partial, size) => partial + size, 0) == shuffledData.shape[0], "Data not fully assigned");
       return { teams: ongoing.teams, seed: seed };
