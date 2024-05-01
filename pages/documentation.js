@@ -94,7 +94,7 @@ export default function Instructions() {
       ),
     },
     {
-      name: "Citizen Status",
+      name: "Citizenship Status",
       allowed: (
         <Row>
           <Col>
