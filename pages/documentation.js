@@ -2,6 +2,11 @@ import Layout from "@/components/layout";
 import { Container, Row, Col } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 
+/**
+ * Component for displaying the documentation for each input criteria
+ * 
+ * @returns {JSX.Element} - The rendered component
+ */
 export default function Instructions() {
   const requirements = [
     {
