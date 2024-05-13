@@ -25,7 +25,6 @@ function ProcessData({
   let emba = new dfd.DataFrame(inputData.data);
   const MAX_TEAM_SIZE = Math.ceil(emba.shape[0] / numTeams);
   const NUM_ITERATIONS = 12500;
-  // const NUM_ITERATIONS = 100;
   const WEIGHTS = generateWeights(rankings.length);
   const [now, setNow] = useState(0);
   const [rerender, setRerender] = useState(true);
@@ -222,8 +221,8 @@ function ProcessData({
         continue;
       }
 
-      if (numLabel.every((elm) => elm == minNum)) {
-        minNum += 1;
+      if (numLabel.every((elm) => elm >= minNum)) {
+        minNum = Math.min(...numLabel) + 1;
       }
       for (let j = 0; j < teams.length; j++) {
         if (numLabel[j] < minNum && teamSizes[j] < MAX_TEAM_SIZE) {
@@ -772,7 +771,6 @@ function ProcessData({
         new dfd.DataFrame([Array(numCols).fill(null)], { columns: cols })
       );
       let seed = Math.random();
-      // let seed = 0.8960922433920508
       let shuffledData = await data.sample(data.shape[0], { seed: seed });
       let ongoing = { data: shuffledData, teams: teams };
       for (let i = 0; i < rankings.length; i++) {
@@ -954,12 +952,12 @@ function ProcessData({
       updateTeams(bestTeams);
       // console.log("max team size:", MAX_TEAM_SIZE);
       // console.log("weights:", WEIGHTS);
-      console.log("final score:", bestScore);
-      console.log("best seed:", bestSeed);
-      console.log(
-        "rankings:",
-        rankings.map((rank) => rank.colLabel)
-      );
+      // console.log("final score:", bestScore);
+      // console.log("best seed:", bestSeed);
+      // console.log(
+      //   "rankings:",
+      //   rankings.map((rank) => rank.colLabel)
+      // );
       setTimeout(() => jumpTo("display"), 2000);
     };
 
