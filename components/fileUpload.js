@@ -14,6 +14,25 @@ function FileUpload({ updateInputData, jumpTo }) {
   const { CSVReader } = useCSVReader();
   const config = { header: true };
 
+  const cleanData = (results) => {
+    for (let i = 0; i < results.data.length; i++) {
+      let row = results.data[i]
+      if (row.hasOwnProperty("")) {
+        delete row[""]
+      }
+
+      let trimmedRow = {}
+      for (let key in row) {
+        if (row.hasOwnProperty(key)) {
+          let trimmedKey = key.trim()
+          trimmedRow[trimmedKey] = row[key]
+        }
+      }
+
+      results.data[i] = trimmedRow
+    }
+  }
+
   return (
     <>
       <p className={classnames("text-center")}>
@@ -26,6 +45,7 @@ function FileUpload({ updateInputData, jumpTo }) {
             const toRemove = results.errors[i][0].row;
             results.data.splice(toRemove, 1);
           }
+          cleanData(results);
           updateInputData(results);
           jumpTo("params");
         }}
