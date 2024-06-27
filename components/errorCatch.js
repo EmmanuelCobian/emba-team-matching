@@ -28,6 +28,24 @@ function ErrorCatch({ jumpTo, category }) {
         </Row>
       );
       break;
+    case "Sexual Orientation":
+      allowedTypes = (
+        <Row>
+          <Col>
+            <li>Heterosexual or Straight</li>
+            <li>Gay or Lesbian</li>
+            <li>Bisexual</li>
+            <li>Queer</li>
+          </Col>
+          <Col>
+            <li>Asexual</li>
+            <li>Pansexual</li>
+            <li>Decline to State</li>
+            <li>Empty Cell</li>
+          </Col>
+        </Row>
+      );
+      break;
     case "PQT":
       allowedTypes = (
         <Row>

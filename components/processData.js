@@ -463,6 +463,17 @@ function ProcessData({
       checkValues(uniqueValues, allowedValues, "Gender");
     }
 
+    // validate sexual orientation column
+    if (ranks.includes("Sexual Orientation")) {
+      if (!data.columns.includes("Sexual Orientation")) {
+        catchError("error", "Sexual Orientation");
+        throw new Error("sexual orientation error");
+      }
+      uniqueValues = data["Sexual Orientation"].unique();
+      allowedValues = ["Heterosexual or Straight", "Gay or Lesbian", "Bisexual", "Asexual", "Pansexual", "Queer", "Decline to State", ""];
+      checkValues(uniqueValues, allowedValues, "Sexual Orientation");
+    }
+
     // validate PQT column
     if (ranks.includes("PQT")) {
       if (!data.columns.includes("PQT")) {
@@ -654,6 +665,11 @@ function ProcessData({
             let numWomen = team["Gender"].eq("Woman").sum();
             score += numWomen * weight;
             break;
+          case "Sexual Orientation":
+            let mask = team["Sexual Orientation"].ne("");
+            let numUniqueSO = team["Sexual Orientation"].loc(mask).nUnique();
+            score += numUniqueSO * weight;
+            break;
           case "Military Status":
             let vetMask = team["Military Status"].ne("");
             let numUniqueVets = team["Military Status"].loc(vetMask).nUnique();
@@ -827,6 +843,17 @@ function ProcessData({
               allowedValues,
               false,
               []
+            );
+            break;
+          case "Sexual Orientation":
+            allowedValues = ["Gay or Lesbian", "Bisexual", "Asexual", "Pansexual", "Queer", "Decline to State"];
+            ongoing = distributeMinLabelAssign(
+              ongoing.data,
+              ongoing.teams,
+              "Sexual Orientation",
+              allowedValues,
+              true,
+              [...allowedValues]
             );
             break;
           case "PQT":

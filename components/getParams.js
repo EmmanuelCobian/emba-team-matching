@@ -41,9 +41,21 @@ function GetParams({ dataLen, updateNumTeams, updateRankings, jumpTo }) {
         disabled: false,
       },
       {
+        displayValue: "Sexual Orientation",
+        colLabel: "Sexual Orientation",
+        icon: "bi bi-gender-trans",
+        disabled: false,
+      },
+      {
         displayValue: "Industry",
         colLabel: "Industry",
         icon: "bi bi-graph-up",
+        disabled: false,
+      },
+      {
+        displayValue: "Function",
+        colLabel: "Function",
+        icon: "bi bi-laptop",
         disabled: false,
       },
       {
